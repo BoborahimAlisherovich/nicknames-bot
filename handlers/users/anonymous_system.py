@@ -33,7 +33,7 @@ def decode_anonymous_token(token):
 
 def generate_anonymous_link(token):
     """Generate anonymous message link"""
-    return f"https://t.me/RealAtlashiniyaBot?start=anon_{token}"
+    return f"https://t.me/niknames_new_bot?start=anon_{token}"
 
 def is_rate_limited(user_id):
     """Check if user is rate limited for anonymous messages (5s cooldown)"""

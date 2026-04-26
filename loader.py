@@ -1,4 +1,5 @@
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
 from data import config
 from baza.sqlite import Database
 from aiogram.enums import ParseMode
@@ -8,6 +9,6 @@ TOKEN = config.BOT_TOKEN
 CHANNELS = config.CHANNELS
 
 
-bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
+bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 db = Database(path_to_db="main.db")
 dp = Dispatcher()

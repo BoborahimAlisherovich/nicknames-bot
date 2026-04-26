@@ -82,3 +82,6 @@ Executing:
 {statement}
 _____________________________________________________
 """)
+
+# Create database instance
+db = Database()

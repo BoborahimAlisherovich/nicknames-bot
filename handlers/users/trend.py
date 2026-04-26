@@ -10,8 +10,10 @@ import logging
 from aiogram import F
 from handlers.users.emojelar import allah_names, top_nick
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.filters import StateFilter
 from aiogram import types
 import json
+import html
 
 def load_texts():
     with open("languages.json", "r", encoding="utf-8") as f:
@@ -27,29 +29,22 @@ def is_guied_us_message(message_text):
     return message_text in possible_texts
 
 
-@dp.message(lambda message: is_guied_us_message(message.text))
+@dp.message(lambda message: is_guied_us_message(message.text), StateFilter("*"))
 async def guied_us(message: Message, state: FSMContext):
     telegram_id = message.from_user.id
-    
     user = db.select_user_by_id(telegram_id=telegram_id)
-
-    language = "uz" 
-
-    if user:
-        language = user[2]
-    text = texts.get(language, {}).get("guide", "Tilga mos matn topilmadi.")
-
+    language = user[2] if user else "uz"
+    
+    text = texts.get(language, {}).get("guide", "Guide not found.")
     await message.answer(text, parse_mode='html')
     await state.clear()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-
-
 NAMES_PER_PAGE = 1 
 NAMES_PER_PAGES = 10 
+
 def get_pagination_keyboard(current_page):
     buttons = []
     if current_page > 0:
@@ -77,66 +72,87 @@ def get_names_pages(page, telegram_id):
     end = start + NAMES_PER_PAGES
     paginated_nicknamess = top_nick[start:end]
 
-    # Foydalanuvchini bazadan olish
     user = db.select_user_by_id(telegram_id=telegram_id)
-
-    language = "uz"  # Standart til
-
-    if user:
-        language = user[2]  # Foydalanuvchining tili bazadan olinadi
-
-    # Tarjima qilingan matnni olish
-    text = texts.get(language, {}).get("invisible_nick", "Tilga mos matn topilmadi.")
+    language = user[2] if user else "uz"
+    text = texts.get(language, {}).get("invisible_nick", "Invisible")
 
     return "\n\n\n".join([
-        f"{idx + start + 1}- <code>{'⠿' if nicks.strip() == 'ㅤㅤㅤ ' else nicks}</code> <i>{text if idx + start == 0 else ''}</i>"
+        f"{idx + start + 1}- <code>{html.escape(nicks)}</code> <i>{text if idx + start == 0 else ''}</i>"
         for idx, nicks in enumerate(paginated_nicknamess)
     ])
 
 
-@dp.message(lambda message: message.text in ["🔥Mashhur Stikerlar", "🔥 Popular Stickers", "🔥 Популярные стикеры"])
+@dp.message(F.text.in_(["🔥 Mashhur Stikerlar", "🔥 Popular Stickers", "🔥 Популярные стикеры"]), StateFilter("*"))
 async def send_names(message: types.Message, state: FSMContext):
-    current_page = 0
-    await message.answer(
-        text="```" + get_names_page(current_page) + "```",
-        reply_markup=get_pagination_keyboard(current_page),
-        parse_mode="Markdown"
-    )
     await state.clear()
+    current_page = 0
+    telegram_id = message.from_user.id
+    user = db.select_user_by_id(telegram_id)
+    language = user[2] if user else "uz"
+    
+    sticker_title = texts.get(language, {}).get("sticker_title", "🔥 Popular Stickers")
+    
+    # Use HTML for better stability
+    sticker_data = get_names_page(current_page)
+    await message.answer(
+        text=f"<b>{sticker_title}</b>\n\n{sticker_data}",
+        reply_markup=get_pagination_keyboard(current_page),
+        parse_mode="HTML"
+    )
 
 @dp.callback_query(lambda c: c.data and (c.data.startswith('next:') or c.data.startswith('prev:')))
 async def process_pagination(callback_query: types.CallbackQuery, state: FSMContext):
     action, page = callback_query.data.split(':')
     current_page = int(page)
     telegram_id = callback_query.from_user.id
-    await callback_query.message.edit_text(
-        text="```" + get_names_page(current_page) + "```",
-        reply_markup=get_pagination_keyboard(current_page),
-        parse_mode="Markdown"
-    )
+    user = db.select_user_by_id(telegram_id)
+    language = user[2] if user else "uz"
+    
+    sticker_title = texts.get(language, {}).get("sticker_title", "🔥 Popular Stickers")
+    sticker_data = get_names_page(current_page)
+    
+    try:
+        await callback_query.message.edit_text(
+            text=f"<b>{sticker_title}</b>\n\n{sticker_data}",
+            reply_markup=get_pagination_keyboard(current_page),
+            parse_mode="HTML"
+        )
+    except:
+        pass
     await callback_query.answer()
-    await state.clear()
 
-@dp.message(lambda message: message.text in ["✨ Top nik","✨ Top Nick","✨ Топ ник"])
+@dp.message(F.text.in_(["✨ Top nik", "✨ Top Nick", "✨ Топ ник"]), StateFilter("*"))
 async def send_namess(message: types.Message, state: FSMContext):
+    await state.clear()
     current_page = 0
     telegram_id = message.from_user.id
+    user = db.select_user_by_id(telegram_id)
+    language = user[2] if user else "uz"
+    
+    nick_title = texts.get(language, {}).get("nick_title", "✨ Top Nick")
+    
     await message.answer(
-        text=get_names_pages(current_page,telegram_id),
+        text=f"<b>{nick_title}</b>\n\n" + get_names_pages(current_page, telegram_id),
         reply_markup=get_pagination_keyboardd(current_page),
         parse_mode="HTML"
     )
-    await state.clear()
 
 @dp.callback_query(lambda c: c.data and (c.data.startswith('next1:') or c.data.startswith('prev1:')))
 async def process_paginations(callback_query: types.CallbackQuery, state: FSMContext):
     action, page = callback_query.data.split(':')
     current_page = int(page)
     telegram_id = callback_query.from_user.id
-    await callback_query.message.edit_text(
-        text=get_names_pages(current_page,telegram_id),
-        reply_markup=get_pagination_keyboardd(current_page),
-        parse_mode="HTML"
-    )
+    user = db.select_user_by_id(telegram_id)
+    language = user[2] if user else "uz"
+    
+    nick_title = texts.get(language, {}).get("nick_title", "✨ Top Nick")
+    
+    try:
+        await callback_query.message.edit_text(
+            text=f"<b>{nick_title}</b>\n\n" + get_names_pages(current_page, telegram_id),
+            reply_markup=get_pagination_keyboardd(current_page),
+            parse_mode="HTML"
+        )
+    except:
+        pass
     await callback_query.answer()
-    await state.clear()

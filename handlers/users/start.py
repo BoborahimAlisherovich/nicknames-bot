@@ -16,6 +16,26 @@ texts = load_texts()
 # /start komanda uchun handler
 @dp.message(CommandStart())
 async def start_command(message: Message, state: FSMContext):
+    # If the user is starting via an anonymous link, let anonymous_system handle it
+    parts = message.text.split(" ")
+    if len(parts) > 1 and parts[1].startswith("anon_"):
+        token = parts[1].replace("anon_", "")
+        from handlers.users.anonymous_system import is_rate_limited, AnonimStates, decode_anonymous_token
+        
+        target_id = decode_anonymous_token(token)
+        if target_id:
+            if is_rate_limited(message.from_user.id):
+                await message.answer("⏱️ Iltimos, biroz kuting! Juda ko'p xabar yuboryapsiz.")
+                return
+            await state.clear()
+            await state.set_state(AnonimStates.AnonimXabarYuborish)
+            await state.update_data(anon_token=token)
+            await message.answer("🕵️ Anonim xabaringizni yuboring:\n\n📝 Marhamat, maxfiy xabaringizni yozib yuboring:")
+            return
+        else:
+            await message.answer("❌ Noto'g'ri yoki tugagan anonim havola.")
+            return
+
     # State tozalash
     await state.clear()
 

@@ -2,66 +2,88 @@
     "uz": {
         "start_message": "Tilni tanlang 🇺🇿 | Choose a language 🇺🇸 | Выберите язык 🇷🇺",
         "selected_language": "Siz O'zbek tilini tanladingiz 🇺🇿",
-        "welcome_message" : "Salom!  Botimizga xush kelibsiz! 🎉 Siz o'ziga xos, qiziqarli va esda qolarli niklar yaratmoqchimisiz? Endi bu juda oson! 💫 Shunchaki ism kiriting va biz sizga eng zo'r variantlarni taqdim etamiz. 🚀",
+        "welcome_message" : "🌟 **NEXT LEVEL SUPER APP**\n\nSizni ko'rib turganimizdan xursandmiz! Quyidagi tugmalardan birini tanlang va botning barcha imkoniyatlaridan foydalaning.",
         "menu": {    
-            "menu_button_1": "🔥Mashhur Stikerlar",
+            "menu_button_1": "🔥 Mashhur Stikerlar",
             "menu_button_2": "✨ Top nik",
-            "menu_button_3": "👨‍💼 Admin ",
-            "menu_button_4": "📙Qo'llanma",
+            "menu_button_11": "📝 Nick Yaratish",
+            "menu_button_6": "👑 Premium Nicks",
+            "menu_button_7": "🎨 Stylish Fonts",
+            "menu_button_8": "🎮 Games",
+            "menu_button_9": "🕵️ Anonymous Msg",
+            "menu_button_10": "🔐 Password Generator",
+            "menu_button_3": "👨‍💼 Admin",
+            "menu_button_4": "📙 Qo'llanma",
             "menu_button_5": "Tilni o'zgartirish"
         },
-        "help" : "Yordam kerakmi? Biz sizga o'zingizga mos, noyob va original nik yaratishda yordam beramiz! 🔥 Istalgancha nik giniratsiya qiling, tanlang va boshqa hech kimga o'xshamaydigan uslubingizni yarating! 😎",
-        "guide" : "💡 Botdan unumli foydalaning va o'z uslubingizni yarating! \n 1️⃣ Qisqa nik yaratish: Botdan qisqa va chiroyli niklar olish uchun ismingizni kiriting – bot sizga noyob variantlarni taklif qiladi. \n 2️⃣ Qo'llanma bilan tanishing: Botdan to'g'ri foydalanishni o'rganish uchun '📙 Qo'llanma' tugmasini bosing va barcha funksiyalar haqida batafsil ma'lumot oling. \n 3️⃣ Top niklar to'plami: Eng chiroyli va mashhur niklar ro'yxatini ko'ring, o'ziga xos uslubingizni toping!\n4️⃣Tilni o'zgartirish ",
+        "help" : "Yordam kerakmi? @admin bilan bog'laning.",
+        "guide" : "🚀 **Botdan foydalanish bo'yicha qo'llanma:**\n\n1️⃣ **Nick Yaratish**: Ismingizni yuboring va 100+ xil uslubdagi niklarga ega bo'ling.\n\n2️⃣ **Anonymous Msg**: Shaxsiy havolangizni oling va uni kanal yoki guruhlarga ulashing. Do'stlaringiz sizga anonim xabarlar yuborishadi.\n\n3️⃣ **Password Generator**: Xavfsiz va kuchli parollar generatsiya qiling. Nusxa olish uchun xabarni ustiga bosing.\n\n4️⃣ **Games**: Eng sara va trenddagi o'yinlarni telegramning o'zida o'ynang.\n\n5️⃣ **Top Niklar**: Eng mashhur va chiroyli tayyor niklar to'plamini ko'ring.\n\n6️⃣ **Mashhur Stikerlar**: Trenddagi stikerlar to'plamidan bahramand bo'ling.\n\n7️⃣ **Adminga Murojaat**: Savol yoki takliflar bo'lsa, Admin tugmasi orqali bizga xabar yuboring.\n\n8️⃣ **Tilni o'zgartirish**: Bot tilini o'zingizga qulay tilga o'zgartiring.",
         "admin_1_t" : "Admin uchun xabar yuboring:",
-        "admin_sent_message": "Xabar  adminga  yuborildi.",
+        "admin_sent_message": "Xabar adminga yuborildi.",
         "admin_reply_message": "Admin javobi:",
         "back_button": "♻️ Orqaga",
-        "about" : "Nik generatsiyasi: Foydalanuvchi ism kiritganda, bot bir nechta turli xil nik variantlarini yaratadi va ularni sahifalarga bo‘lib ko‘rsatadi. Har bir sahifada 10 ta nik ko‘rsatiladi va foydalanuvchi “Orqaga” yoki “Oldinga” tugmalari yordamida sahifalarni o‘zaro o‘zgartirishi mumkin.",
-        "invisible_nick" : "Ko'rinmas Nick"
-
-
+        "about": "Super App - Nickname, Games, Anonymous Messages and more.",
+        "invisible_nick": "Ko'rinmas nik",
+        "sticker_title": "🔥 Mashhur Stikerlar",
+        "nick_title": "✨ Top Nik",
+        "first_nick": "🏆 Birinchi nik"
     },
     "us" : {
-        "start_message": "Choose a language 🇺🇸 | Tilni tanlang 🇺🇿 | Выберите язык 🇷🇺",
+        "start_message": "Choose a language 🇺🇸",
         "selected_language": "You selected English 🇺🇸",
-        "welcome_message" : "Hello!  Do you want to create unique, interesting, and memorable nicknames? Now it's super easy! 💫 Just enter your name, and we’ll provide you with the best options. 🚀",
+        "welcome_message" : "🌟 **NEXT LEVEL SUPER APP**\n\nWelcome! Please select one of the features below to start.",
         "menu": {
             "menu_button_1": "🔥 Popular Stickers",
             "menu_button_2": "✨ Top Nick",
+            "menu_button_11": "📝 Create Nick",
+            "menu_button_6": "👑 Premium Nicks",
+            "menu_button_7": "🎨 Stylish Fonts",
+            "menu_button_8": "🎮 Games",
+            "menu_button_9": "🕵️ Anonymous Msg",
+            "menu_button_10": "🔐 Password Generator",
             "menu_button_3": "👨‍💼 Admin",
             "menu_button_4": "📙 Guide",
-            "menu_button_5": "Change language"
+            "menu_button_5": "Change Language"
         },
-        "help" :"Need help? We help you create unique, custom, and original nicknames! 🔥 Generate as many nicknames as you want, choose, and create a style that's totally yours! 😎",
-        "guide" : "💡 Make the most out of the bot and create your style! \n 1️⃣ Create short nicknames: Enter your name to get short and creative nicknames from the bot. \n 2️⃣ Explore the guide: Press '📙 Guide' for detailed instructions on how to use the bot. \n 3️⃣ Top nick collection: See the list of most stylish and popular nicknames, and find your unique style\n4️⃣Change the language",
-        "admin_1_t" : "Send a message to the admin:",
+        "help" :"Need help? Contact @admin.",
+        "guide" : "🚀 **User Guide:**\n\n1️⃣ **Create Nick**: Send your name and get 100+ stylish nicknames.\n\n2️⃣ **Anonymous Msg**: Get your link and share it to receive anonymous messages.\n\n3️⃣ **Password Generator**: Generate strong passwords. Click to copy.\n\n4️⃣ **Games**: Play trending games directly inside Telegram.\n\n5️⃣ **Top Nicks**: See the collection of the most popular nicks.\n\n6️⃣ **Popular Stickers**: Enjoy the trending sticker sets.\n\n7️⃣ **Contact Admin**: Send your questions or suggestions to the admin.\n\n8️⃣ **Language Settings**: Change the bot language anytime.",
+        "admin_1_t" : "Send message to admin:",
         "admin_sent_message": "Message sent to admin.",
-        "admin_reply_message": "Admin's reply:",
+        "admin_reply_message": "Admin reply:",
         "back_button": "♻️ Back",
-        "about": "Nickname Generation: When a user enters their name, the bot generates several different nickname options and displays them divided into pages. Each page shows 10 nicknames, and the user can navigate between pages using the “Back” or “Next” buttons.",
-        "invisible_nick" : "invisible nick"
-
+        "about":"Super App - Nickname, Games, Anonymous Messages and more.",
+        "invisible_nick": "Invisible nick",
+        "sticker_title": "🔥 Popular Stickers",
+        "nick_title": "✨ Top Nick",
+        "first_nick": "🏆 First nick"
     },
     "ru" : {
-        "start_message": "Выберите язык 🇷🇺 | Tilni tanlang 🇺🇿 | Choose a language 🇺🇸",
+        "start_message": "Выберите язык 🇷🇺",
         "selected_language": "Вы выбрали русский язык 🇷🇺",
-        "welcome_message" : "Здравствуйте!  Хотите создать уникальные, интересные и запоминающиеся ники? Теперь это очень просто! 💫 Просто введите своё имя, и мы предоставим вам лучшие варианты. 🚀",
+        "welcome_message" : "🌟 **NEXT LEVEL SUPER APP**\n\nДобро пожаловать! Выберите одну из функций ниже.",
         "menu": {
             "menu_button_1": "🔥 Популярные стикеры",
             "menu_button_2": "✨ Топ ник",
+            "menu_button_11": "📝 Создать ник",
+            "menu_button_6": "👑 Премиум ники",
+            "menu_button_7": "🎨 Стильные шрифты",
+            "menu_button_8": "🎮 Игры",
+            "menu_button_9": "🕵️ Анонимное сообщение",
+            "menu_button_10": "🔐 Генератор паролей",
             "menu_button_3": "👨‍💼 Админ",
-            "menu_button_4": "📙 Инструкция",
+            "menu_button_4": "📙 Руководство",
             "menu_button_5": "Изменить язык"
         },
-        "help":"Нужна помощь? Мы поможем вам создать уникальные, индивидуальные и оригинальные ники! 🔥 Генерируйте столько ников, сколько хотите, выбирайте и создавайте стиль, который будет только вашим! 😎",
-        "guide" : "💡 Используйте бота максимально эффективно и создавайте свой стиль! \n 1️⃣ Создание коротких ников: Введите свое имя и получите короткие и креативные ники от бота. \n 2️⃣ Исследуйте руководство: Нажмите '📙 Руководство' для подробных инструкций по использованию бота. \n 3️⃣ Коллекция топовых ников: Посмотрите список самых стильных и популярных ников, и найдите свой уникальный стиль\n4️⃣Сменить язык",
+        "help":"Нужна помощь? Свяжитесь с @admin.",
+        "guide" : "🚀 **Руководство пользователя:**\n\n1️⃣ **Создать ник**: Отправьте свое имя и получите 100+ стильных ников.\n\n2️⃣ **Анонимные сообщения**: Получите ссылку и делитесь ею.\n\n3️⃣ **Генератор паролей**: Генерируйте надежные пароли. Нажмите, чтобы скопировать.\n\n4️⃣ **Игры**: Играйте в топовые игры прямо в Telegram.\n\n5️⃣ **Топ ники**: Коллекция самых популярных имен.\n\n6️⃣ **Стикеры**: Наслаждайтесь наборами трендовых стикеров.\n\n7️⃣ **Связь с Админом**: Отправляйте свои вопросы через кнопку Админ.\n\n8️⃣ **Смена языка**: Выберите удобный для вас язык.",
         "admin_1_t" : "Отправить сообщение администратору:",
         "admin_sent_message": "Сообщение отправлено администратору.",
         "admin_reply_message": "Ответ администратора:",
         "back_button": "♻️ Назад",
-        "about":"Генерация никнеймов: Когда пользователь вводит свое имя, бот создает несколько различных вариантов никнеймов и отображает их, разделенных на страницы. На каждой странице показывается 10 никнеймов, а пользователь может переключаться между страницами с помощью кнопок «Назад» или «Далее».",
-        "invisible_nick": "невидимый ник"
-        
+        "about":"Super App - Nickname, Games, Anonymous Messages and more.",
+        "invisible_nick": "невидимый ник",
+        "sticker_title": "🔥 Популярные стикеры",
+        "nick_title": "✨ Топ ники",
+        "first_nick": "🏆 Первый ник"
     }
 }
-

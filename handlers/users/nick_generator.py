@@ -1,6 +1,8 @@
 import random
 
-text = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
+text_lower = "qwertyuiopasdfghjklzxcvbnm"
+text_upper = "QWERTYUIOPASDFGHJKLZXCVBNM"
+text_combined = text_lower + text_upper
 
 yozuv = [
    "ợฬєгtץยเ๏թคร๔Ŧɠђןкlzxςv๒ภ๓",
@@ -21,7 +23,7 @@ yozuv = [
    "qwᴇrᴛyuiᴏᴩᴀsdfghjᴋlzxᴄvʙnʍ",
     "વਘ૯ʀ੮ⲩυɪ૦ƿɑઽᑯ⨍ɢⲏᴊκʟⲍⲭςνᑲⲛⲙ",
       "qⲱⲉʀⲧⲩυⲓⲟⲣⲁⲋⲇϝⳋⲏⳗⲕⳑⲍⲭⲥⳳⲃⲛⲙ",
-       "າ໖౿ཞรຯບ୲ഠ༩คຣລச໑ลຽ๙ℓຂ྾໒୶ദກຕ",
+       "າ໖౿ཞรຯບ୲ഠ༩คຣລச໑ลຽ๙ℓຂ྾໒୶দກຕ",
        "ꐎꅐꂅꉸꉢꌦꏵꀤꏿꉣꁲꌗꅓꊰꁅꍬꀭꂪ꒒ꏣꉧꊐꏝꃃꊮꂵ",
       "ⵕᏔⵟⴽⵜᖿƲⵊⵔᎮѦⵢⵠƑGⴼɈҞȽƵⵋⵎⴸɃƝᗑ",
       "ϙωεɾʈγμʝσραʂɗϝɠɦʆӄɭʐ𑀌ϲѵϸηϻ",
@@ -30,35 +32,35 @@ yozuv = [
     "ᘯᙡᙓᖇᙢᎽᑌᖗᗝᖘᗣᔕᗪᖴᘜᕼᒍᏦᒐᘔⵋᙅᐯᙖᘉᗰ",
     "🆀🆆🅴🆁🆃🆈🆄🅸🅾🅿🅰🆂🅳🅵🅶🅷🅹🅺🅻🆉🆇🅲🆅🅱🅽🅼",  
      "ɋաɛʀȶʏʊɨօքǟֆɖʄɢɦʝӄʟʐӼƈʋɮռʍ",
-    "Ⴓᗯᕮᖇ丅ϤႮᎥѺᎮᗩᔕᕲҒᏀᎻᎫᏦᏞᏃᏃᎭᏉᏰᏁᎷ"
+    "Ⴓᗯᕮᖇ丅ϤႮᎥѺᎮᗩᔕᕲҒᏀᎻᎫᏦᏞᏃᏃᎭᏉᏰᏁᎷ",
      "𝚚ω𝒆𝓻𝓽ƴ𝑢¡⊙𝖕ⲁ𝚜đꊰġĥⓙҜ𝚕𝘻xc𝚟ᵦח",  
-    "𝓠𝓦𝓔𝓡𝓣𝓨𝓤𝓘𝓞𝓟𝓐𝓢𝓓𝓕𝓖𝓗𝓙𝓚𝓛𝓩𝓧𝓒𝓥𝓑𝓝𝓜",  
+    "𝓠𝓦𝓔𝓡𝓣𝓨𝓤𝓘𝓞𝓟𝓐𝓢𝓓𝓕𝓖𝓗𝓙𝓚𝓛𝓩𝓧𝓒𝓥𝓑𝓝М",  
     "𝕼𝖂𝖊𝖗𝖙𝖞𝖚𝖎𝖔𝖕𝖆𝖘𝖉𝖋𝖌𝖍𝖏𝖐𝖑𝖟𝖝𝖈𝖛𝖇𝖓𝖒",   
     "𝑄𝑊𝐸𝑅𝑇𝒴𝒰𝐼𝒪𝒫𝒜𝒮𝒟𝑭𝑮𝑯𝑱𝒦𝑳𝒵𝒳𝑪𝒱𝒷𝒩𝑴",  
     "𝐐𝐖𝐄𝐑𝐓𝐘𝐔𝐈𝐎𝐏𝐀𝐒𝐃𝐅𝐆𝐇𝐉𝐊𝐋𝐌", 
     "🅀🅆🄴🅁🅃🅈🅄🄸🄾🄿🄰🅂🄳🄵🄶🄷🄹🄺🄻🅉🅇🄲🅅🄱🄽🄼",  
     "ⓠⓦⓔⓡⓣⓨⓤⓘⓞⓟⓐⓢⓓⓕⓖⓗⓙⓚⓛⓩⓧⓒⓥⓑⓝⓜ",  
     "🅠🅦🅔🅡🅣🅨🅤🅘🅞🅟🅐🅢🅓🅕🅖🅗🅙🅚🅛🅩🅧🅒🅥🅑🅝🅜",  
-    "𝔮𝔴𝔢𝔯𝔱𝔶𝔲𝔦𝔬𝔭𝔞𝔰𝔡𝔣𝔤𝔥𝔧𝔨𝔩𝔷𝔵𝔠𝔳𝔟𝔫𝔪",   #33 
+    "𝔮𝔴𝔢𝔯𝔱𝔶𝔲𝔦𝔬𝔭𝔞𝔰𝔡𝔣𝔤𝔥𝔧𝔨𝔩𝔷𝔵𝔠𝔳𝔟𝔫𝔪",  
     "𝕢𝕨𝕖𝕣𝕥𝕪𝕦𝕚𝕠𝕡𝕒𝕤𝕕𝕗𝕘𝕙𝕛𝕜𝕝𝕫𝕩𝕔𝕧𝕓𝕟𝕞",  
-    "𝑄𝑊𝐸𝑅𝑇𝑌𝑈𝐼𝑂𝑃𝐴𝑆𝐷𝐹𝐺𝐻𝐽𝐾𝐿𝑍𝑋𝐶𝑉𝐵𝑁𝑀",
+    "𝑄𝑊𝐸𝑅𝑇𝑌𝑈𝐼𝐎𝐏𝐀𝐒𝐃𝐅𝐆𝐇𝐉𝐊𝐋𝐙𝐗𝐂𝐕𝐁𝐍М",
      "Ɋᗯᗴᖇ丅ƳᑌᎥᗝᑭᗩᔕᗪᖴǤᕼᒎᛕᒪ乙᙭ᑕᐯᗷᑎᗰ",
      "QŴĔŔŤŶÚĨŐРĂŚĎŦĞĤĴĶĹŹЖČVβŃМ",
-    "𝑞𝑤𝑒𝑟𝑡𝑦𝑢𝑖𝑜𝑝𝑎𝑠𝑑𝑓𝑔𝑕𝑗𝑘𝑙𝑧𝑥𝑐𝑣𝑏𝑛𝑚", 
+    "𝑞𝑤𝑒𝑟𝑡𝑦𝑢𝑖𝑜𝑝𝑎𝑠𝑑𝑓𝑔𝑗𝑘𝑙𝑧𝑥𝑐𝑣𝑏𝑛𝑚", 
     "🅢🅘🅜🅑🅞🅛🅢",   
     'ợฬєгՇץยเ๏קคร๔Ŧﻮђןкɭչאςש๒ภ๓',
     "qʷᵉʳᵗʸᵘⁱᵒᵖᵃˢᵈᶠᵍʰʲᵏˡᶻˣᶜᵛᵇⁿᵐ",
     "qЩΣЯƬyЦiӨpΛƧdfgΉjkᄂzxᄃvbПm",
     "Ɋ山乇尺ㄒㄚㄩ丨ㄖ卩卂丂ᗪ千Ꮆ卄ﾌҜㄥ乙乂匚ᐯ乃几爪", 
     "ꆰꅐꏂꋪ꓄ꌦ꒤꒐ꄲꉣꋬꇙ꒯ꊰꍌꁝ꒻ꀘ꒒ꁴꉧꉔ꒦ꃳꋊꂵ",
-    "𝘲𝘸𝘦𝘳𝘵𝘺𝘶𝘪𝘰𝘱𝘢𝘴𝘥𝘧𝘨𝘩𝘫𝘬𝘭𝘻𝘹𝘤𝘷𝘣𝘯𝘮",
+    "𝘲𝘸𝘦𝘳𝓽𝔂𝘶𝘪ｵ𝘱𝘢𝘴𝘥𝘧𝘨𝘩𝘫𝗄𝘭𝗓𝘹𝘤𝘷𝘣𝘯𝘮",
     "ҩω૯Ր੮עυɿ૦ƿคςძԲ૭ҺʆқՆઽ૪८౮ცՈɱ",
     "qwₑᵣ𝚝yᵤᵢₒ𝐩ₐ𝘴𝚍fg𝓱ⱼ𝓴ᄂzₓ𝚌ᵥ𝚋𝚗ᗰ",
     "ϙɯҽɾƚყυισραʂԃϝɠԋʝƙʅȥxƈʋႦɳɱ",
     "ｑώⒺℝ𝓣ч𝕌𝕚ᵒƤＡ𝕤Ⓓ𝕗قĦנｋ𝕃𝕫ˣ𝐜𝕧𝔟ภ𝓶",
     "Q₩ɆⱤ₮ɎɄłØ₱₳₴Đ₣₲ⱧJ₭ⱠⱫӾ₵V฿₦₥", 
     "𝔔𝔚𝔈ℜ𝔗𝔜𝔘𝔓𝔄𝔖𝔇𝔉𝔊ℌ𝔍𝔎𝔏ℨ𝔛ℭ𝔙𝔅𝔑𝔐", 
-     "𝖰𝗐𝖾𝗋𝗍𝗒𝗎𝗂𝗈𝗉𝖺𝗌𝖽𝖿𝗀𝗁𝗃𝗄𝗅𝗓𝗑𝖼𝗏𝖻𝗇𝗆",
+     "𝖰𝗐𝖾𝗋𝗍𝗒𝗎𝗂𝗈𝗉𝖺𝗌𝖽▵𝗀𝗁𝗃𝗄𝗅𝗓𝗑𝖼𝗏𝖻𝗇𝗆",
      "𝐐𝐰𝐞𝐫𝐭𝐲𝐮𝐢𝐨𝐩𝐚𝐬𝐝𝐟𝐠𝐡𝐣𝐤𝐥𝐳𝐱𝐜𝐯𝐛𝐧𝐦",
      "ᑫᗯEᖇTYᑌIOᑭᗩᔕᗪᖴGᕼᒍKᒪᘔ᙭ᑕᐯᗷᑎᗰ",
      "𝔔𝔴𝔢𝔯𝔱𝔶𝔲𝔦𝔬𝔭𝔞𝔰𝔡𝔣𝔤𝔥𝔧𝔨𝔩𝔷𝔵𝔠𝔳𝔟𝔫𝔪",
@@ -74,50 +76,46 @@ yozuv = [
      "𝒒᭙𝒆𝗿†ᥡᶶ¡őᵽ𝕒ṧÐϝ𝑔𝐡ɉ𝐤ₗᴢxc𝔳𝔟𝚗m",
      "qwêr†¥µïðþå§Ð£ghjklzx¢vßñm",
      "q𝔀ⓔᖇ𝕥ｙⓊᎥσｐ𝓪ร∂ᶠᎶђＪⓀ𝓵žx𝒸ⓥ𝕓ⓝⓂ",  
-    ]
+]
 
+def add_stylized_effects(name):
+    # Potential for adding emojis or extra chars if needed, currently just base
+    return name
 
-
-
-
-def add_stylized_effects(text):
-    special_chars = [""]
-    result = ""
-    for char in text:
-        result += char + random.choice(special_chars)
-    return result
-
-
-
-def nick_generator(name,son=None):
+def nick_generator(name, son=None):
     result = []
-    if son:
-        fon = yozuv[son-1]
-        min_length = max(len(text), len(fon))
-        my_name = name
-        for i in range(min_length):
-          if i < len(name) and i < len(fon):  
-            my_name = my_name.replace(text[i], fon[i])
-            
-            
-        return my_name
     
+    # Process the name to be translated robustly
+    if son:
+        if 0 < son <= len(yozuv):
+            fon = yozuv[son - 1]
+            # Mapping for both cases if font is 26 chars
+            if len(fon) == 26:
+                trans = str.maketrans(text_lower + text_upper, fon + fon)
+            else:
+                l = min(len(text_combined), len(fon))
+                trans = str.maketrans(text_combined[:l], fon[:l])
+            return name.translate(trans)
+        return name
     else:
         for fon in yozuv:
-            min_length = min(len(text), len(fon))
-            my_name = name
-            for i in range(min_length):
-                my_name = my_name.replace(text[i], fon[i])
-            stylized_name = add_stylized_effects(my_name)
-            my_name_with_emoji = f" {stylized_name}"
+            if len(fon) == 26:
+                trans = str.maketrans(text_lower + text_upper, fon + fon)
+            else:
+                l = min(len(text_combined), len(fon))
+                trans = str.maketrans(text_combined[:l], fon[:l])
             
-            result.append(my_name_with_emoji)
+            stylized = name.translate(trans)
+            result.append(f" {stylized}")
         return result
 
-def transform_text(input_text, styles):
-    selected_style = random.choice(styles)
-    translation_table = str.maketrans(text, selected_style)
-    return input_text.translate(translation_table)
-
-
-
+def transform_text(input_text, styles=None):
+    if styles is None:
+        styles = yozuv
+    selected = random.choice(styles)
+    if len(selected) == 26:
+        trans = str.maketrans(text_lower + text_upper, selected + selected)
+    else:
+        l = min(len(text_combined), len(selected))
+        trans = str.maketrans(text_combined[:l], selected[:l])
+    return input_text.translate(trans)

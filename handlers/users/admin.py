@@ -20,9 +20,8 @@ async def kanalga_obuna(message:Message):
         inline_channel.add(InlineKeyboardButton(text=f"{index+1}-kanal",url=ChatInviteLink.invite_link))
     inline_channel.adjust(1,repeat=True)
     button = inline_channel.as_markup()
-    await message.answer(f"{text} kanallarga azo bo'ling\nva qayta /start ni bosing!",reply_markup=button)
 
-    
+    await message.answer(f"{text} kanallarga azo bo'ling\nva qayta /start ni bosing!",reply_markup=button)
 
 
 @dp.message(Command("admin"),IsBotAdminFilter(ADMINS))

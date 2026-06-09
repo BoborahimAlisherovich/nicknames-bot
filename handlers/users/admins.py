@@ -19,25 +19,13 @@ logger = logging.getLogger(__name__)
 @dp.message(F.text.in_(["♻️ Orqaga", "♻️ Back", "♻️ Назад"]))
 async def back_to_menu(message: Message, state: FSMContext):
     await state.clear()
-    # await message.answer("Asosiy menyuga qaytish", reply_markup=create_menu_buttons("uz"))
     telegram_id = message.from_user.id
-
-    # Foydalanuvchining tilini aniqlash
     user = db.select_user_by_id(telegram_id=telegram_id)
-    language = "uz"  # Default til
-    if user:
-        language = user[2]
-
-    # Holatni tozalash
-    await state.clear()
-
-    # Menyuga qaytarish
-    if language == "uz":
-        await message.answer("Ism kiriting yoki tugmalardan birini tanlang", reply_markup=create_menu_buttons(language))
-    elif language == "us":
-        await message.answer("Enter a name or select one of the buttons", reply_markup=create_menu_buttons(language))
-    elif language == "ru":
-        await message.answer("Введите имя или выберите одну из кнопок", reply_markup=create_menu_buttons(language))
+    language = user[2] if user else "uz"
+    await message.answer(
+        texts.get(language, {}).get("welcome_message", "Bosh menyu"),
+        reply_markup=create_menu_buttons(language)
+    )
 
 
 
@@ -78,79 +66,66 @@ def create_inline_keyboard(user_id):
     return keyboard_builder.as_markup()
 
 
-import re
+import html as htmlmod
 
 def get_user_link(user_id, first_name):
-    # Maxsus belgilarni qochirish
-    escaped_name = re.sub(r'([_\*\[\]\(\)~`>\#+\-=|{}\.!])', r'\\\1', first_name)
-    return f"[{escaped_name}](tg://user?id={user_id})"
+    safe_name = htmlmod.escape(first_name)
+    return f'<a href="tg://user?id={user_id}">{safe_name}</a>'
 
-# def get_user_link(user_id, first_name):
-#     return f"[{first_name}](tg://user?id={user_id})"
-
-# Handle admin messages and redirect to main menu with back button
 @dp.message(AdminStates.waiting_for_admin_message, F.content_type.in_([
     ContentType.TEXT, ContentType.AUDIO, ContentType.VOICE, ContentType.VIDEO,
-    ContentType.PHOTO, ContentType.ANIMATION, ContentType.STICKER, 
+    ContentType.PHOTO, ContentType.ANIMATION, ContentType.STICKER,
     ContentType.LOCATION, ContentType.DOCUMENT, ContentType.CONTACT,
     ContentType.VIDEO_NOTE
 ]))
 async def handle_admin_message(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     first_name = message.from_user.first_name
-    user_link = get_user_link(user_id, first_name)  
+    user_link = get_user_link(user_id, first_name)
     inline_keyboard = create_inline_keyboard(user_id)
 
     telegram_id = message.from_user.id
     user = db.select_user_by_id(telegram_id=telegram_id)
-    language = user[2] if user else "uz"  # Default til 'uz'
+    language = user[2] if user else "uz"
 
     sent_message_text = texts.get(language, {}).get("admin_sent_message", "Xatolik yuz berdi.")
-    await state.clear()
 
-    # Send content to admin with the inline keyboard
     for admin_id in ADMINS:
         try:
             if message.text:
                 await bot.send_message(
                     admin_id,
-                    f"Foydalanuvchi: {user_link}\n\nXabar:\n{message.text}",
-                    reply_markup=inline_keyboard,
-                    parse_mode="Markdown"
+                    f"Foydalanuvchi: {user_link}\n\nXabar:\n{htmlmod.escape(message.text)}",
+                    reply_markup=inline_keyboard
                 )
             elif message.photo:
                 await bot.send_photo(
-                    admin_id, 
+                    admin_id,
                     message.photo[-1].file_id,
                     caption=f"Foydalanuvchi: {user_link}\n\nRasm xabar",
-                    reply_markup=inline_keyboard,
-                    parse_mode="Markdown"
+                    reply_markup=inline_keyboard
                 )
             elif message.voice:
                 await bot.send_voice(
                     admin_id,
                     message.voice.file_id,
                     caption=f"Foydalanuvchi: {user_link}\n\nVoice xabar",
-                    reply_markup=inline_keyboard,
-                    parse_mode="Markdown"
+                    reply_markup=inline_keyboard
                 )
             elif message.video:
                 await bot.send_video(
                     admin_id,
                     message.video.file_id,
                     caption=f"Foydalanuvchi: {user_link}\n\nVideo xabar",
-                    reply_markup=inline_keyboard,
-                    parse_mode="Markdown"
+                    reply_markup=inline_keyboard
                 )
             else:
                 await bot.send_message(admin_id, f"Foydalanuvchidan yangi xabar: {user_link}")
         except Exception as e:
             logger.error(f"Xatolik adminga xabar yuborishda: {e}")
-    
+
     await state.clear()
     await message.answer(sent_message_text, reply_markup=create_menu_buttons(language))
-    
-
 
 
 # Handling the reply callback
@@ -167,12 +142,16 @@ async def process_reply_callback(callback_query: CallbackQuery, state: FSMContex
 # Handle admin's reply to the user
 @dp.message(AdminStates.waiting_for_reply_message)
 async def handle_admin_reply(message: Message, state: FSMContext):
+    if message.text and message.text in ["♻️ Orqaga", "♻️ Back", "♻️ Назад"]:
+        await state.clear()
+        await back_to_menu(message, state)
+        return
+
     data = await state.get_data()
     user_id = data.get('reply_user_id')
-    
-    telegram_id = message.from_user.id
-    user = db.select_user_by_id(telegram_id=user_id)
-    language = user[2] if user else "uz"  # Default til 'uz'
+
+    user = db.select_user_by_id(telegram_id=user_id) if user_id else None
+    language = user[2] if user else "uz"
 
     sent_message_text = texts.get(language, {}).get("admin_reply_message", "Xatolik yuz berdi.")
     if user_id:

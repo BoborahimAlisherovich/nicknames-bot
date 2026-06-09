@@ -45,15 +45,14 @@ async def premium_features_menu(callback: CallbackQuery, state: FSMContext):
     
     keyboard = InlineKeyboardBuilder()
     
-    # Premium features buttons
     premium_text = {
-        "uz": "👑 Premium Niklar",
-        "us": "👑 Premium Nicks", 
+        "uz": "👑 Premium niklar",
+        "us": "👑 Premium Nicks",
         "ru": "👑 Премиум ники"
     }
-    
+
     fonts_text = {
-        "uz": "🎨 Stylish Shriftlar",
+        "uz": "🎨 Chiroyli shriftlar",
         "us": "🎨 Stylish Fonts",
         "ru": "🎨 Стильные шрифты"
     }

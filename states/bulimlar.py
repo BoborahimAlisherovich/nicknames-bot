@@ -12,3 +12,6 @@ class ShortNickStates(StatesGroup):
 class LongNickStates(StatesGroup):
     waiting_for_text = State()
     waiting_for_number = State()
+
+class ChannelStates(StatesGroup):
+    waiting_for_channel = State()

@@ -75,6 +75,28 @@ class Database:
     def all_users_id(self):
         return self.execute("SELECT telegram_id FROM Users;", fetchall=True)
 
+    def create_table_channels(self):
+        sql = """
+        CREATE TABLE IF NOT EXISTS Channels(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            channel_id TEXT UNIQUE
+        );
+        """
+        self.execute(sql, commit=True)
+
+    def add_channel(self, channel_id: str):
+        sql = "INSERT OR IGNORE INTO Channels(channel_id) VALUES(?)"
+        self.execute(sql, parameters=(channel_id,), commit=True)
+
+    def delete_channel(self, channel_id: str):
+        sql = "DELETE FROM Channels WHERE channel_id = ?"
+        self.execute(sql, parameters=(channel_id,), commit=True)
+
+    def get_channels(self):
+        sql = "SELECT channel_id FROM Channels;"
+        rows = self.execute(sql, fetchall=True)
+        return [row[0] for row in rows] if rows else []
+
 def logger(statement):
     print(f"""
 _____________________________________________________        

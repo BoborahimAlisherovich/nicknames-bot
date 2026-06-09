@@ -43,8 +43,12 @@ admin_button = ReplyKeyboardMarkup(
         [
             KeyboardButton(text="Foydalanuvchilar soni"),
             KeyboardButton(text="Reklama yuborish"),
-        ]     
-    ],  
+        ],
+        [
+            KeyboardButton(text="Kanal qoshish"),
+            KeyboardButton(text="Kanallar royhati"),
+        ],
+    ],
    resize_keyboard=True,
    input_field_placeholder="Menudan birini tanlang"
 )

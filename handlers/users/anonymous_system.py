@@ -54,7 +54,7 @@ def load_texts():
 
 texts = load_texts()
 
-@dp.message(F.text.in_(["🕵️ Anonymous Msg", "🕵️ Анонимное сообщение", "🕵️ Anonymous Message"]), StateFilter("*"))
+@dp.message(F.text.in_(["🕵️ Anonim xabar", "🕵️ Anonymous Msg", "🕵️ Анонимное сообщение"]), StateFilter("*"))
 async def anonymous_menu_handler(message: Message, state: FSMContext):
     await state.clear()
     telegram_id = message.from_user.id
@@ -70,20 +70,28 @@ async def anonymous_menu_handler(message: Message, state: FSMContext):
     
     anon_texts = {
         "uz": {
-            "title": "🕵️ **Anonim Xabarlar Sistemi**",
-            "instructions": f"🚀 **Qanday ishlaydi:**\n\n1️⃣ Pastdagi linkni oling va uni kanal hamda guruhlarga yuboring.\n2️⃣ Ular sizning havola orqali sizga anonim tarzda xabarlar yuborishadi.\n3️⃣ Xabarlar sizga shu bot orqali keladi va siz javob bera olasiz.\n\n📊 Jami kelgan xabarlar: {message_count}\n\n🔗 **Sizning havolangiz:**",
+            "title": "🕵️ Anonim Xabarlar Sistemi",
+            "instructions": f"Qanday ishlaydi:\n\n1. Pastdagi linkni oling va kanal/guruhlarga yuboring.\n2. Ular havola orqali sizga anonim xabar yuborishadi.\n3. Xabarlar shu bot orqali keladi, siz javob bera olasiz.\n\n📊 Jami xabarlar: {message_count}\n\n🔗 Sizning havolangiz:",
             "copy_link": "📋 Linkni nusxala",
             "share_link": "🔗 Ulashish"
+        },
+        "us": {
+            "title": "🕵️ Anonymous Message System",
+            "instructions": f"How it works:\n\n1. Get the link below and share it on channels/groups.\n2. They send you anonymous messages via the link.\n3. Messages arrive here, and you can reply.\n\n📊 Total messages: {message_count}\n\n🔗 Your link:",
+            "copy_link": "📋 Copy link",
+            "share_link": "🔗 Share"
+        },
+        "ru": {
+            "title": "🕵️ Анонимные сообщения",
+            "instructions": f"Как это работает:\n\n1. Получите ссылку ниже и отправьте её в каналы/группы.\n2. Они будут отправлять вам анонимные сообщения.\n3. Сообщения приходят сюда, вы можете ответить.\n\n📊 Всего сообщений: {message_count}\n\n🔗 Ваша ссылка:",
+            "copy_link": "📋 Копировать",
+            "share_link": "🔗 Поделиться"
         }
     }
-    
-    # Simple fallback for other languages to Uz for now as requested for these specific instructions
-    t = anon_texts.get("uz") 
-    
-    response_text = f"{t['title']}\n\n"
-    response_text += f"{t['instructions']}\n\n"
-    response_text += f"`{anon_link}`\n\n"
-    response_text += "👆 **Nusxa olish uchun havola ustiga bosing!**"
+
+    t = anon_texts.get(language, anon_texts["us"])
+
+    response_text = f"{t['title']}\n\n{t['instructions']}\n\n`{anon_link}`\n\n"
     
     keyboard = InlineKeyboardBuilder()
     keyboard.row(
@@ -165,12 +173,4 @@ async def copy_anon_link(callback: CallbackQuery):
     await callback.message.answer(f"📋 **Sizning havolangiz (Nusxa olish uchun bosing):**\n\n`{link}`", parse_mode="Markdown")
     await callback.answer("Link yuborildi!")
 
-@dp.callback_query(lambda c: c.data == "back_to_menu")
-async def back_to_main_menu(callback: CallbackQuery, state: FSMContext):
-    from keyboard_buttons.admin_keyboard import create_menu_buttons
-    await state.clear()
-    user = db.select_user_by_id(telegram_id=callback.from_user.id)
-    language = user[2] if user else "uz"
-    await callback.message.answer(texts.get(language, {}).get("welcome_message", "🏠"), reply_markup=create_menu_buttons(language))
-    await callback.message.delete()
-    await callback.answer()
+

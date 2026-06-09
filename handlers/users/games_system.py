@@ -67,7 +67,7 @@ def load_texts():
 
 texts = load_texts()
 
-@dp.message(F.text.in_(["🎮 Games", "🎮 Games", "🎮 Игры"]), StateFilter("*"))
+@dp.message(F.text.in_(["🎮 O'yinlar", "🎮 Games", "🎮 Игры"]), StateFilter("*"))
 async def games_menu_handler(message: Message, state: FSMContext):
     await state.clear()
     telegram_id = message.from_user.id

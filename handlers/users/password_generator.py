@@ -62,7 +62,7 @@ def load_texts():
 
 texts = load_texts()
 
-@dp.message(F.text.in_(["🔐 Password Generator", "🔐 Password Generator", "🔐 Генератор паролей"]), StateFilter("*"))
+@dp.message(F.text.in_(["🔐 Parol generator", "🔐 Password Generator", "🔐 Генератор паролей"]), StateFilter("*"))
 async def password_generator_handler(message: Message, state: FSMContext):
     await state.clear()
     telegram_id = message.from_user.id

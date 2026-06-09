@@ -20,7 +20,7 @@ def load_texts():
 texts = load_texts()
 
 # Premium nickname categories handler
-@dp.message(lambda message: message.text in ["👑 Premium Nicks", "👑 Premium Nicks", "👑 Премиум ники"])
+@dp.message(lambda message: message.text in ["👑 Premium niklar", "👑 Premium Nicks", "👑 Премиум ники"])
 async def premium_nicknames_handler(message: Message, state: FSMContext):
     # Clear all states before starting premium nicknames
     await state.clear()
@@ -62,7 +62,7 @@ async def premium_nicknames_handler(message: Message, state: FSMContext):
     )
 
 # Premium font styles handler
-@dp.message(lambda message: message.text in ["🎨 Stylish Fonts", "🎨 Stylish Fonts", "🎨 Стильные шрифты"])
+@dp.message(lambda message: message.text in ["🎨 Chiroyli shriftlar", "🎨 Stylish Fonts", "🎨 Стильные шрифты"])
 async def premium_fonts_handler(message: Message, state: FSMContext):
     # Clear all states before starting premium fonts
     await state.clear()

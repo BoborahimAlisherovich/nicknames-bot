@@ -1,7 +1,7 @@
 import json
 from aiogram.types import Message, CallbackQuery
 from loader import dp, db
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, StateFilter
 from keyboard_buttons.admin_keyboard import create_menu_buttons, language
 from aiogram.fsm.context import FSMContext
 
@@ -14,7 +14,7 @@ texts = load_texts()
 
 # /start komanda uchun handler
 # /start komanda uchun handler
-@dp.message(CommandStart())
+@dp.message(CommandStart(), StateFilter("*"))
 async def start_command(message: Message, state: FSMContext):
     # If the user is starting via an anonymous link, let anonymous_system handle it
     parts = message.text.split(" ")
@@ -104,7 +104,7 @@ def language_message(message_text):
     return message_text in possible_texts
 
 # Tilni o'zgartirish uchun handler
-@dp.message(lambda message: language_message(message.text))
+@dp.message(lambda message: language_message(message.text), StateFilter("*"))
 async def language_us(message: Message, state: FSMContext):
     # State tozalash
     await state.clear()
@@ -120,4 +120,3 @@ async def language_us(message: Message, state: FSMContext):
     # Xabar yuborish
     text = texts.get(language_u, {}).get("start_message", "Tilga mos matn topilmadi.")
     await message.answer(text, parse_mode='html', reply_markup=language)
-

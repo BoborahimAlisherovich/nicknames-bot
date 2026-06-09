@@ -1,16 +1,20 @@
 from filterss.check_sub_channel import IsCheckSubChannels
-from loader import dp, bot, db, ADMINS
+from loader import dp, bot, db, ADMINS, TOKEN
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from filterss.admin import IsBotAdminFilter
 from states.reklama import Adverts
 from states.bulimlar import ChannelStates
 from aiogram.fsm.context import FSMContext
 from keyboard_buttons import admin_keyboard
 from keyboard_buttons.admin_keyboard import create_menu_buttons
+from aiogram.exceptions import ClientDecodeError
 import time
 import json
+import html
+import aiohttp
+from types import SimpleNamespace
 from aiogram import F
 import logging
 
@@ -18,6 +22,26 @@ logger = logging.getLogger(__name__)
 
 
 texts_cache = None
+
+
+async def get_chat_safe(chat_id):
+    try:
+        return await bot.get_chat(chat_id)
+    except ClientDecodeError:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"https://api.telegram.org/bot{TOKEN}/getChat",
+                data={"chat_id": chat_id},
+            ) as response:
+                data = await response.json()
+
+        if not data.get("ok"):
+            description = data.get("description", "getChat failed")
+            raise RuntimeError(description)
+
+        result = data["result"]
+        title = result.get("title") or result.get("username") or str(result.get("id", chat_id))
+        return SimpleNamespace(id=result.get("id", chat_id), title=title)
 
 def get_texts():
     global texts_cache
@@ -27,11 +51,8 @@ def get_texts():
     return texts_cache
 
 
-@dp.message(IsCheckSubChannels())
+@dp.message(IsCheckSubChannels(), lambda message: not (message.text and message.text.startswith("/start")))
 async def kanalga_obuna(message: Message, state: FSMContext):
-    if message.text and message.text.startswith("/start"):
-        return
-
     current_state = await state.get_state()
     if current_state is not None:
         return
@@ -45,7 +66,7 @@ async def kanalga_obuna(message: Message, state: FSMContext):
 
     for channel in channels:
         try:
-            chat = await bot.get_chat(int(channel))
+            chat = await get_chat_safe(int(channel))
             inline_channel.add(InlineKeyboardButton(
                 text=chat.title,
                 url=(await bot.create_chat_invite_link(int(channel))).invite_link
@@ -96,19 +117,22 @@ async def check_subscription_callback(callback: CallbackQuery):
     )
 
 
-@dp.message(Command("admin"), IsBotAdminFilter(ADMINS))
-async def is_admin(message: Message):
+@dp.message(Command("admin"), IsBotAdminFilter(ADMINS), StateFilter("*"))
+async def is_admin(message: Message, state: FSMContext):
+    await state.clear()
     await message.answer(text="Admin menu", reply_markup=admin_keyboard.admin_button)
 
 
-@dp.message(F.text == "Foydalanuvchilar soni", IsBotAdminFilter(ADMINS))
-async def users_count(message: Message):
+@dp.message(F.text == "Foydalanuvchilar soni", IsBotAdminFilter(ADMINS), StateFilter("*"))
+async def users_count(message: Message, state: FSMContext):
+    await state.clear()
     counts = db.count_users()
     await message.answer(text=f"Botimizda {counts[0]} ta foydalanuvchi bor")
 
 
-@dp.message(F.text == "Reklama yuborish", IsBotAdminFilter(ADMINS))
+@dp.message(F.text == "Reklama yuborish", IsBotAdminFilter(ADMINS), StateFilter("*"))
 async def advert_dp(message: Message, state: FSMContext):
+    await state.clear()
     await state.set_state(Adverts.adverts)
     await message.answer(text="Reklama yuborishingiz mumkin!")
 
@@ -130,8 +154,9 @@ async def send_advert(message: Message, state: FSMContext):
     await state.clear()
 
 
-@dp.message(F.text == "Kanal qoshish", IsBotAdminFilter(ADMINS))
+@dp.message(F.text == "Kanal qoshish", IsBotAdminFilter(ADMINS), StateFilter("*"))
 async def add_channel_start(message: Message, state: FSMContext):
+    await state.clear()
     await state.set_state(ChannelStates.waiting_for_channel)
     await message.answer(
         "Kanal ID sini yoki kanal username/linkini yuboring:\n\n"
@@ -151,20 +176,20 @@ async def add_channel_handle(message: Message, state: FSMContext):
     if text.startswith("https://t.me/+"):
         invite_hash = text.split("+")[1]
         try:
-            chat = await bot.get_chat(f"invite/{invite_hash}")
+            chat = await get_chat_safe(f"invite/{invite_hash}")
             kanal_id = str(chat.id)
         except:
             pass
     elif text.startswith("https://t.me/"):
         username = text.split("https://t.me/")[1].split("/")[0]
         try:
-            chat = await bot.get_chat(f"@{username}")
+            chat = await get_chat_safe(f"@{username}")
             kanal_id = str(chat.id)
         except:
             pass
     elif text.startswith("@"):
         try:
-            chat = await bot.get_chat(text)
+            chat = await get_chat_safe(text)
             kanal_id = str(chat.id)
         except:
             pass
@@ -176,7 +201,7 @@ async def add_channel_handle(message: Message, state: FSMContext):
         return
 
     try:
-        chat = await bot.get_chat(int(kanal_id))
+        chat = await get_chat_safe(int(kanal_id))
         bot_member = await bot.get_chat_member(int(kanal_id), (await bot.me()).id)
         if bot_member.status not in ("administrator", "creator"):
             await message.answer(f"Bot {chat.title} kanalida admin emas. Avval botni kanalga admin qiling.")
@@ -191,7 +216,7 @@ async def add_channel_handle(message: Message, state: FSMContext):
                 "3. Kanal ID notogri – ID ni tekshiring"
             )
         else:
-            await message.answer(f"Xatolik: {err_text}")
+            await message.answer(f"Xatolik: {html.escape(err_text)}")
         return
     finally:
         await state.clear()
@@ -200,8 +225,9 @@ async def add_channel_handle(message: Message, state: FSMContext):
     await message.answer(f"Kanal qoshildi: {chat.title}")
 
 
-@dp.message(F.text == "Kanallar royhati", IsBotAdminFilter(ADMINS))
-async def list_channels(message: Message):
+@dp.message(F.text == "Kanallar royhati", IsBotAdminFilter(ADMINS), StateFilter("*"))
+async def list_channels(message: Message, state: FSMContext):
+    await state.clear()
     channels = db.get_channels()
     if not channels:
         await message.answer("Hozircha kanal qoshilmagan.")
@@ -211,7 +237,7 @@ async def list_channels(message: Message):
     keyboard = InlineKeyboardBuilder()
     for idx, ch in enumerate(channels, 1):
         try:
-            chat = await bot.get_chat(int(ch))
+            chat = await get_chat_safe(int(ch))
             text += f"{idx}. {chat.title}\n"
         except:
             text += f"{idx}. {ch} (topilmadi)\n"

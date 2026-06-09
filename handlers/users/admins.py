@@ -7,6 +7,7 @@ from aiogram.types import CallbackQuery, ContentType
 from keyboard_buttons import admin_keyboard
 from aiogram import types
 from aiogram import F
+from aiogram.filters import StateFilter
 import logging
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 import json
@@ -16,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@dp.message(F.text.in_(["♻️ Orqaga", "♻️ Back", "♻️ Назад"]))
+@dp.message(F.text.in_(["♻️ Orqaga", "♻️ Back", "♻️ Назад"]), StateFilter("*"))
 async def back_to_menu(message: Message, state: FSMContext):
     await state.clear()
     telegram_id = message.from_user.id
@@ -44,8 +45,9 @@ def is_guied_us_message(message_text):
     ]
     return message_text in possible_texts
 
-@dp.message(lambda message: is_guied_us_message(message.text))
+@dp.message(lambda message: is_guied_us_message(message.text), StateFilter("*"))
 async def admin_us(message: Message, state: FSMContext):
+    await state.clear()
     telegram_id = message.from_user.id
 
     user = db.select_user_by_id(telegram_id=telegram_id)
@@ -171,5 +173,4 @@ async def handle_admin_reply(message: Message, state: FSMContext):
             await message.reply("Xatolik: Javob yuborishda xato yuz berdi.")
     else:
         await message.reply("Xatolik: Javob yuborish uchun foydalanuvchi topilmadi.")
-
 

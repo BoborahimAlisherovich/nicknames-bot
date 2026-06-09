@@ -11,3 +11,4 @@ from . import emojelar
 from . import menu_navigation
 from . import games_system
 from . import password_generator
+from . import premium_handler

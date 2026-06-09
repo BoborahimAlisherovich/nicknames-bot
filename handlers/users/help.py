@@ -1,6 +1,7 @@
 from aiogram.types import Message
 from loader import dp, db
 from aiogram.filters import Command
+from aiogram.filters import StateFilter
 import json
 from keyboard_buttons.admin_keyboard import create_menu_buttons
 from aiogram.fsm.context import FSMContext
@@ -11,7 +12,7 @@ def load_texts():
 
 texts = load_texts()
 
-@dp.message(Command("help"))
+@dp.message(Command("help"), StateFilter("*"))
 async def help_commands(message: Message,state:FSMContext):
     telegram_id = message.from_user.id
 

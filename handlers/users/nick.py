@@ -111,7 +111,7 @@ async def generate_short_nicks(message: types.Message, state: FSMContext):
 
     await message.answer(
         f"✍️ <b>{html.escape(name)}</b> uchun bo'limni tanlang:\n\n"
-        "🔤 Shriftlar · ✨ Bezakli · 💎 Aralash — bir zumda\n"
+        "🔤 Shriftlar · ✨ Bezakli — bepul\n👑 Premium dizayn — 10 ⭐\n"
         "🤖 Pastdagi mavzular — AI ijodiy niklar",
         reply_markup=markup.as_markup()
     )
@@ -213,6 +213,12 @@ async def nick_section(callback: CallbackQuery, state: FSMContext):
     name = (await state.get_data()).get("name")
     if not name:
         return await callback.answer("❌ Avval ismingizni yuboring!", show_alert=True)
+    if kind == "mix":
+        from data import paywall
+        if not paywall.has(callback.from_user.id, "nick_premium"):
+            await callback.message.edit_text(paywall.offer_text("nick_premium"),
+                                             reply_markup=paywall.offer_kb("nick_premium", "nst_back"))
+            return await callback.answer()
     items = nick_styles.build(kind, name, seed)
     pages = (len(items) + PAGE - 1) // PAGE
     page %= pages

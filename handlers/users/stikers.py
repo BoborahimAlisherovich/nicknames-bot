@@ -427,6 +427,7 @@ async def static_packs(callback: CallbackQuery):
 # ---------------- ⭐ Umumiy stikerlar kolleksiyasi (faqat admin qo'shadi) ----------------
 
 SH_PER_PAGE = 8
+FREE_PAGES = 3  # shundan keyingi sahifalar 10 ⭐ bilan ochiladi
 
 
 def _shared_markup(page: int, is_admin: bool, language: str):
@@ -445,7 +446,10 @@ def _shared_markup(page: int, is_admin: bool, language: str):
         if page > 0:
             nav.append(InlineKeyboardButton(text="⬅️", callback_data=f"stshpg_{page-1}"))
         if start + SH_PER_PAGE < len(rows):
-            nav.append(InlineKeyboardButton(text="➡️", callback_data=f"stshpg_{page+1}"))
+            from data import paywall
+            locked = page + 1 >= FREE_PAGES and not is_admin
+            nav.append(InlineKeyboardButton(text="➡️ 🔒 10 ⭐" if locked and page + 1 == FREE_PAGES else "➡️",
+                                            callback_data=f"stshpg_{page+1}"))
         if nav:
             markup.row(*nav)
         if is_admin:
@@ -505,6 +509,15 @@ async def shared_stickers(callback: CallbackQuery, state: FSMContext):
 async def shared_stickers_page(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     page = int(callback.data.replace("stshpg_", ""))
+    from data import paywall
+    if page >= FREE_PAGES and not paywall.has(callback.from_user.id, "stickers_all"):
+        try:
+            await callback.message.edit_text(paywall.offer_text("stickers_all") +
+                                             f"\n\n🆓 Birinchi {FREE_PAGES} sahifa bepul.",
+                                             reply_markup=paywall.offer_kb("stickers_all", f"stshpg_{FREE_PAGES - 1}"))
+        except Exception:
+            pass
+        return await callback.answer()
     await _show_shared(callback, page)
 
 

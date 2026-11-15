@@ -119,7 +119,7 @@ def mix(name: str, seed: str, n: int = 30) -> list[tuple[str, str]]:
 SECTIONS = {
     "font": ("🔤 Shriftlar", "Har xil shriftlarda"),
     "frame": ("✨ Bezakli", "Chiroyli ramka va belgilar bilan"),
-    "mix": ("💎 Aralash dizayn", "Shrift + bezak kombinatsiyasi (har safar yangi)"),
+    "mix": ("👑 Premium dizayn · 10 ⭐", "Shrift + bezak kombinatsiyasi, har safar yangi"),
 }
 
 

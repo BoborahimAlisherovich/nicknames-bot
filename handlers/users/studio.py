@@ -313,6 +313,19 @@ async def pre_checkout(q: PreCheckoutQuery):
 @dp.message(F.successful_payment)
 async def paid(m: Message):
     p = m.successful_payment
+    if p.invoice_payload.startswith("unlock:"):
+        from data import paywall
+        item = p.invoice_payload.split(":", 1)[1]
+        paywall.grant(m.from_user.id, item, p.total_amount, p.telegram_payment_charge_id)
+        title = paywall.ITEMS.get(item, (0, item))[1]
+        await m.answer(f"✅ To'lov qabul qilindi! <b>{title}</b> endi siz uchun ochiq. Rahmat! 💝")
+        for a in ADMINS:
+            try:
+                await bot.send_message(a, f"🔓 Sotildi: {title} — {p.total_amount} ⭐\n👤 {html.escape(m.from_user.full_name)} "
+                                          f"(<code>{m.from_user.id}</code>)")
+            except Exception:
+                pass
+        return
     await m.answer(f"🎉 Rahmat! {p.total_amount} ⭐ qabul qilindi. Siz zo'rsiz! 💝")
     for a in ADMINS:
         try:
@@ -447,3 +460,15 @@ async def rps_play(c: CallbackQuery):
                               reply_markup=kb([b(f"{e} {k.title()}", f"g:rp:{k}", "primary") for k, (e, _) in RPS.items()],
                                               [b("⬅️ O'yinlar", "g:home", "danger")]))
     await c.answer()
+
+
+@dp.callback_query(F.data.startswith("unlock:"))
+async def unlock_buy(c: CallbackQuery):
+    from data import paywall
+    item = c.data.split(":", 1)[1]
+    if item not in paywall.ITEMS:
+        return await c.answer()
+    if paywall.has(c.from_user.id, item):
+        return await c.answer("✅ Bu sizda allaqachon ochiq", show_alert=True)
+    await c.answer()
+    await paywall.send_invoice(c.from_user.id, item)

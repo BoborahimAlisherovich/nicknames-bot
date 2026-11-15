@@ -1,3 +1,4 @@
+from aiogram.dispatcher.event.bases import SkipHandler
 from filterss.check_sub_channel import IsCheckSubChannels
 from loader import dp, bot, db, ADMINS, TOKEN
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -45,13 +46,12 @@ async def get_chat_safe(chat_id):
 
 @dp.message(IsCheckSubChannels(), lambda message: not (message.text and message.text.startswith("/start")))
 async def kanalga_obuna(message: Message, state: FSMContext):
-    current_state = await state.get_state()
-    if current_state is not None:
-        return
-
+    # Eslatma: ilgari foydalanuvchi biror holatda (anonim xabar, AI so'rov...) bo'lsa,
+    # bu yerda jimgina return qilinardi va xabar YO'QOLARDI. Endi obuna so'raladi,
+    # holat saqlanadi - obunadan keyin foydalanuvchi davom ettira oladi.
     channels = db.get_channels()
     if not channels:
-        return
+        raise SkipHandler()
 
     inline_channel = InlineKeyboardBuilder()
     valid_channels = []
@@ -68,7 +68,7 @@ async def kanalga_obuna(message: Message, state: FSMContext):
             logger.warning(f"Kanal {channel} haqida ma'lumot olishda xato: {e}")
 
     if not valid_channels:
-        return
+        raise SkipHandler()  # kanal ma'lumoti olinmadi - foydalanuvchini bloklamaymiz
 
     inline_channel.adjust(1, repeat=True)
     inline_channel.row(InlineKeyboardButton(
@@ -76,13 +76,13 @@ async def kanalga_obuna(message: Message, state: FSMContext):
         callback_data="check_subscription"
     ))
     await message.answer(
-        "Kanalga azo boling!",
+        "📢 Botdan foydalanish uchun quyidagi kanal(lar)ga a'zo bo'ling, so'ng «Tekshirish ✅» ni bosing:",
         reply_markup=inline_channel.as_markup()
     )
 
 
 @dp.callback_query(lambda c: c.data == "check_subscription")
-async def check_subscription_callback(callback: CallbackQuery):
+async def check_subscription_callback(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     channels = db.get_channels()
 
@@ -102,6 +102,12 @@ async def check_subscription_callback(callback: CallbackQuery):
     # Azo bo'ldi - keshga yozamiz, keyingi 10 daqiqa qayta tekshirilmaydi
     from filterss.check_sub_channel import IsCheckSubChannels
     IsCheckSubChannels.mark_verified(user_id)
+
+    # Anonim xabar yozayotgan edi - menyu emas, davom ettirishni aytamiz
+    from handlers.users.anonymous_system import AnonimStates
+    if await state.get_state() == AnonimStates.AnonimXabarYuborish.state:
+        await callback.message.answer("✅ Rahmat! Endi anonim xabaringizni yozib yuboring:")
+        return
 
     user = db.select_user_by_id(telegram_id=user_id)
     language = user[2] if user else "uz"

@@ -26,6 +26,8 @@ async def start_command(message: Message, state: FSMContext):
                 await message.answer("⏱️ Iltimos, biroz kuting! Juda ko'p xabar yuboryapsiz.")
                 return
             await state.clear()
+            if not db.select_user_by_id(telegram_id=message.from_user.id):
+                db.add_user(full_name=message.from_user.full_name, telegram_id=message.from_user.id, language="uz")
             await state.set_state(AnonimStates.AnonimXabarYuborish)
             await state.update_data(anon_token=token)
             await message.answer("🕵️ Anonim xabaringizni yuboring:\n\n📝 Marhamat, maxfiy xabaringizni yozib yuboring:")

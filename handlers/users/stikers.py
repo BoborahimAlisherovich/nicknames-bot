@@ -34,17 +34,88 @@ logger = logging.getLogger(__name__)
 texts = get_texts()
 
 # Tekshirilgan (real mavjud) Telegram paketlari - static ro'yxat
-STATIC_PACKS = [
-    {"name": "UtyaDuck",        "title": "🦆 Utya Duck (klassik)"},
-    {"name": "UtyaWinter",      "title": "❄️ Utya Winter"},
-    {"name": "UtyaNewYear",     "title": "🎄 Utya New Year"},
-    {"name": "UtyaHalloween",   "title": "🎃 Utya Halloween"},
-    {"name": "UtyaBirthday",    "title": "🎂 Utya Birthday"},
-    {"name": "UtyaAghori",      "title": "😎 Utya Aghori"},
-    {"name": "PepoCrypto",      "title": "🐸 Pepo Crypto"},
-    {"name": "AnimatedEmojies", "title": "✨ Animated Emoji"},
-    {"name": "EmojiAnimations", "title": "🎬 Emoji Animations"},
-]
+# Mashhur Telegram paketlari (nomzodlar). Bot ishga tushganda har biri
+# getStickerSet bilan TEKSHIRILADI - mavjud bo'lmaganlari ro'yxatga chiqmaydi.
+STATIC_PACKS = [{"name": n, "title": t} for n, t in [
+    ("UtyaDuck", "🦆 Utya Duck"), ("UtyaWinter", "❄️ Utya Winter"), ("UtyaNewYear", "🎄 Utya New Year"),
+    ("UtyaHalloween", "🎃 Utya Halloween"), ("UtyaBirthday", "🎂 Utya Birthday"), ("UtyaAghori", "😎 Utya Aghori"),
+    ("UtyaDuckFull", "🦆 Utya Full"), ("HotCherry", "🍒 Hot Cherry"), ("PepoCrypto", "🐸 Pepo Crypto"),
+    ("AnimatedEmojies", "✨ Animated Emoji"), ("EmojiAnimations", "🎬 Emoji Animations"), ("TgCat", "🐱 Telegram Cat"),
+    ("Animals", "🐾 Animals"), ("ChristmasDuck", "🎅 Christmas Duck"), ("DuckDuck", "🦆 Duck Duck"),
+    ("Pepe", "🐸 Pepe"), ("PepeTheFrog", "🐸 Pepe the Frog"), ("FroggyFrog", "🐸 Froggy"), ("SadPepe", "😢 Sad Pepe"),
+    ("CuteCats", "😺 Cute Cats"), ("Cats", "🐈 Cats"), ("Catsss", "🐈 Catsss"), ("MemeCats", "😹 Meme Cats"),
+    ("Doge", "🐕 Doge"), ("DogeMemes", "🐕 Doge Memes"), ("ShibaInu", "🐶 Shiba Inu"), ("Corgi", "🐶 Corgi"),
+    ("Panda", "🐼 Panda"), ("BearBrown", "🐻 Brown Bear"), ("Bunny", "🐰 Bunny"), ("Penguin", "🐧 Penguin"),
+    ("Hamster", "🐹 Hamster"), ("Bobr", "🦫 Bobr"), ("MrBean", "🤵 Mr Bean"), ("Shrek", "🟢 Shrek"),
+    ("SpongeBob", "🧽 SpongeBob"), ("Minions", "💛 Minions"), ("Pikachu", "⚡ Pikachu"), ("Pokemon", "🔴 Pokemon"),
+    ("Naruto", "🍥 Naruto"), ("OnePiece", "🏴‍☠️ One Piece"), ("Anime", "🌸 Anime"), ("Memes", "😂 Memes"),
+    ("Mems", "😂 Mems"), ("Uzbek", "🇺🇿 Uzbek"), ("UzbekMemes", "🇺🇿 Uzbek Memes"), ("Love", "❤️ Love"),
+    ("Hearts", "💖 Hearts"), ("Kolobok", "🟡 Kolobok"), ("Smileys", "🙂 Smileys"), ("Emoji", "😀 Emoji"),
+]]
+
+_verified_cache: dict = {"at": 0.0, "packs": []}
+
+
+async def verified_packs() -> list[dict]:
+    """Haqiqatan mavjud paketlar (6 soat keshlanadi). Sarlavha Telegram'dan olinadi."""
+    import asyncio
+    import time as _t
+    if _verified_cache["packs"] and _t.time() - _verified_cache["at"] < 6 * 3600:
+        return _verified_cache["packs"]
+    sem = asyncio.Semaphore(8)
+
+    async def check(p):
+        async with sem:
+            try:
+                st = await bot.get_sticker_set(p["name"])
+                return {"name": st.name, "title": p["title"], "count": len(st.stickers), "set": st}
+            except Exception:
+                return None
+
+    res = [r for r in await asyncio.gather(*(check(p) for p in STATIC_PACKS)) if r]
+    _verified_cache.update(at=_t.time(), packs=res)
+    return res
+
+
+async def fill_shared(per_pack: int = 6, added_by: int = 0) -> int:
+    """Umumiy kolleksiyani mashhur paketlardan to'ldiradi (dublikatsiz)."""
+    have = {row[1] for row in (db.get_shared_stickers() or [])}
+    added = 0
+    for p in await verified_packs():
+        for st in p["set"].stickers[:per_pack]:
+            if st.file_id not in have:
+                db.add_shared_sticker(st.file_id, f"{p['title']} {st.emoji or ''}".strip(), added_by)
+                have.add(st.file_id)
+                added += 1
+    return added
+
+
+@dp.startup()
+async def _auto_fill_stickers():
+    """Kolleksiya bo'sh bo'lsa, bot ishga tushganda avtomatik to'ldiriladi."""
+    import asyncio
+
+    async def job():
+        try:
+            if db.count_shared_stickers() == 0:
+                n = await fill_shared()
+                logger.info("Stiker kolleksiyasi avtomatik to'ldirildi: %s ta", n)
+        except Exception as e:
+            logger.warning("Stikerlarni to'ldirib bo'lmadi: %s", e)
+    asyncio.create_task(job())
+
+
+@dp.message(F.text.in_(["/stfill", "🔥 Stikerlarni to'ldirish"]), IsBotAdminFilter(ADMINS), StateFilter("*"))
+async def admin_fill_stickers(message: Message, state: FSMContext):
+    await state.clear()
+    wait = await message.answer("⏳ Mashhur paketlar tekshirilmoqda va kolleksiya to'ldirilmoqda...")
+    _verified_cache["at"] = 0
+    n = await fill_shared(added_by=message.from_user.id)
+    packs = await verified_packs()
+    await wait.edit_text(f"✅ Tayyor!\n📦 Ishlaydigan paketlar: {len(packs)} ta\n"
+                         f"⭐ Kolleksiyaga qo'shildi: {n} ta stiker\n"
+                         f"📊 Jami kolleksiyada: {db.count_shared_stickers()} ta")
+
 
 ST_PER_PAGE = 10
 
@@ -328,12 +399,13 @@ async def add_sticker_via_button(callback: CallbackQuery, state: FSMContext):
 async def static_packs(callback: CallbackQuery):
     language = _lang(callback.from_user.id)
 
+    await callback.answer("⏳")
+    packs = await verified_packs() or [dict(p, count=0) for p in STATIC_PACKS[:10]]
     markup = InlineKeyboardBuilder()
-    for p in STATIC_PACKS:
-        markup.row(InlineKeyboardButton(
-            text=f"{p['title']} 📦",
-            url=f"https://t.me/addstickers/{p['name']}"
-        ))
+    for p in packs[:60]:
+        markup.button(text=f"{p['title']} ({p['count']})" if p["count"] else p["title"],
+                      url=f"https://t.me/addstickers/{p['name']}")
+    markup.adjust(2)
     markup.row(icon_button("♻️ Orqaga", callback_data="st_menu", style_key="back"))
 
     try:
@@ -350,7 +422,6 @@ async def static_packs(callback: CallbackQuery):
             parse_mode="HTML",
             reply_markup=markup.as_markup()
         )
-    await callback.answer()
 
 
 # ---------------- ⭐ Umumiy stikerlar kolleksiyasi (faqat admin qo'shadi) ----------------

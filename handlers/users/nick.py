@@ -9,6 +9,18 @@ from keyboard_buttons.admin_keyboard import create_back_button, create_menu_butt
 from handlers.users.nick_ai import get_theme_buttons, generate_nicks, format_nicks_list
 import html
 
+from handlers.users import nick_styles
+
+PAGE = 10
+
+
+def sections_markup():
+    mk = InlineKeyboardBuilder()
+    mk.row(*[InlineKeyboardButton(text=t, callback_data=f"nst:{k}:0:0")
+             for k, (t, _) in list(nick_styles.SECTIONS.items())[:2]])
+    mk.row(InlineKeyboardButton(text=nick_styles.SECTIONS["mix"][0], callback_data="nst:mix:0:0"))
+    return mk
+
 class NickState(StatesGroup):
     WaitingForName = State()
 
@@ -88,7 +100,7 @@ async def generate_short_nicks(message: types.Message, state: FSMContext):
 
     # Kayfiyat/mavzu tanlash (AI). Eski shrift ro'yxati olib tashlandi -
     # foydalanuvchi faqat mavzu tanlaydi.
-    markup = InlineKeyboardBuilder()
+    markup = sections_markup()
     theme_buttons = get_theme_buttons()
     # 2 tadan qator
     for i in range(0, len(theme_buttons), 2):
@@ -98,7 +110,9 @@ async def generate_short_nicks(message: types.Message, state: FSMContext):
         markup.row(*row)
 
     await message.answer(
-        CHOOSE_THEME.get(language, CHOOSE_THEME["us"]),
+        f"✍️ <b>{html.escape(name)}</b> uchun bo'limni tanlang:\n\n"
+        "🔤 Shriftlar · ✨ Bezakli · 💎 Aralash — bir zumda\n"
+        "🤖 Pastdagi mavzular — AI ijodiy niklar",
         reply_markup=markup.as_markup()
     )
 
@@ -189,4 +203,48 @@ async def ai_page(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text(text, parse_mode="HTML", reply_markup=markup.as_markup())
     except Exception:
         await callback.message.answer(text, parse_mode="HTML", reply_markup=markup.as_markup())
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("nst:"))
+async def nick_section(callback: CallbackQuery, state: FSMContext):
+    _, kind, page, seed = callback.data.split(":")
+    page = int(page)
+    name = (await state.get_data()).get("name")
+    if not name:
+        return await callback.answer("❌ Avval ismingizni yuboring!", show_alert=True)
+    items = nick_styles.build(kind, name, seed)
+    pages = (len(items) + PAGE - 1) // PAGE
+    page %= pages
+    chunk = items[page * PAGE:(page + 1) * PAGE]
+    title, desc = nick_styles.SECTIONS[kind]
+    lines = [f"{title} — <i>{desc}</i>", "👆 Nikni bosing — nusxalanadi\n"]
+    for i, (label, nick) in enumerate(chunk, page * PAGE + 1):
+        tag = f" <i>({html.escape(label)})</i>" if label else ""
+        lines.append(f"{i}. <code>{html.escape(nick)}</code>{tag}")
+    lines.append(f"\n📄 {page + 1}/{pages} · Jami: {len(items)}")
+
+    mk = InlineKeyboardBuilder()
+    mk.row(InlineKeyboardButton(text="⬅️", callback_data=f"nst:{kind}:{page - 1}:{seed}"),
+           InlineKeyboardButton(text="➡️", callback_data=f"nst:{kind}:{page + 1}:{seed}"))
+    if kind == "mix":
+        mk.row(InlineKeyboardButton(text="🔄 Yangi dizaynlar", callback_data=f"nst:mix:0:{int(seed) + 1}"))
+    mk.row(InlineKeyboardButton(text="📂 Boshqa bo'lim", callback_data="nst_back"))
+    try:
+        await callback.message.edit_text("\n".join(lines), reply_markup=mk.as_markup())
+    except Exception:
+        await callback.message.answer("\n".join(lines), reply_markup=mk.as_markup())
+    await callback.answer()
+
+
+@dp.callback_query(F.data == "nst_back")
+async def nick_sections_back(callback: CallbackQuery, state: FSMContext):
+    name = (await state.get_data()).get("name")
+    if not name:
+        return await callback.answer("❌ Avval ismingizni yuboring!", show_alert=True)
+    markup = sections_markup()
+    tb = get_theme_buttons()
+    for i in range(0, len(tb), 2):
+        markup.row(*[InlineKeyboardButton(text=f"{e} {l}", callback_data=cb) for cb, e, l in tb[i:i + 2]])
+    await callback.message.edit_text(f"✍️ <b>{html.escape(name)}</b> uchun bo'limni tanlang:", reply_markup=markup.as_markup())
     await callback.answer()

@@ -168,6 +168,8 @@ async def regen(c: CallbackQuery, state: FSMContext):
 def games_kb():
     return kb(
         [b("🧩 AI topishmoq", "g:riddle", "primary"), b("🔢 Son top", "g:guess", "success")],
+        [b("❓ AI viktorina", "g:quiz", "success"), b("🔤 So'z top", "g:word", "primary")],
+        [b("🎬 Emoji topishmoq", "g:emoji", "primary"), b("✂️ Tosh-qaychi-qog'oz", "g:rps", "success")],
         [b("🎲", "g:d:🎲"), b("🎯", "g:d:🎯"), b("🏀", "g:d:🏀"),
          b("⚽", "g:d:⚽"), b("🎳", "g:d:🎳"), b("🎰", "g:d:🎰")],
         [BACK],
@@ -352,3 +354,96 @@ async def card_receipt(m: Message, state: FSMContext):
         except Exception:
             pass
     await m.answer("✅ Chek adminga yuborildi. Katta rahmat! 💝")
+
+
+# ---------------------------------------------------------- Qo'shimcha AI o'yinlar
+QUIZ_FALLBACK = [
+    ("O'zbekistonning poytaxti qaysi?", ["Toshkent", "Samarqand", "Buxoro", "Xiva"], 0),
+    ("Yer Quyosh atrofini necha kunda aylanadi?", ["365", "30", "100", "24"], 0),
+    ("Eng katta okean qaysi?", ["Tinch", "Atlantika", "Hind", "Shimoliy Muz"], 0),
+    ("Alisher Navoiy qaysi asrda yashagan?", ["XV", "XII", "XVIII", "X"], 0),
+]
+WORDS = ["kitob", "maktab", "telefon", "kompyuter", "olma", "bahor", "do'stlik", "quyosh", "daryo", "samolyot",
+         "futbol", "shaxmat", "tarvuz", "yulduz", "kapalak", "muzqaymoq", "televizor", "universitet"]
+EMOJI_FALLBACK = [("🦁👑", "sher qirol"), ("🕷🧑", "o'rgimchak odam"), ("❄️👸", "muz malika"), ("🚢🧊💔", "titanik")]
+
+
+async def _ask(c: CallbackQuery, state: FSMContext, question: str, answer: str, tag: str):
+    await state.set_state(St.riddle)
+    await state.update_data(a=answer.lower().strip(" ."))
+    await c.message.answer(f"{tag}\n\n{html.escape(question)}\n\n✍️ Javobni yozing:",
+                           reply_markup=kb([b("🙈 Javobni ko'rsat", "g:ans", "danger")]))
+
+
+@dp.callback_query(F.data == "g:quiz")
+async def quiz(c: CallbackQuery, state: FSMContext):
+    await c.answer("⏳")
+    res = await ai("O'zbek tilida bitta qiziqarli umumiy bilim savoli tuz. Format aynan bitta qator: "
+                   "SAVOL|variant1|variant2|variant3|variant4|to'g'ri_variant_raqami(1-4)")
+    q = None
+    try:
+        parts = [p.strip() for p in res.strip().splitlines()[0].split("|")]
+        if len(parts) == 6:
+            q = (parts[0], parts[1:5], int(parts[5]) - 1)
+    except Exception:
+        pass
+    q = q or random.choice(QUIZ_FALLBACK)
+    question, opts, right = q
+    order = list(range(4))
+    random.shuffle(order)
+    await state.update_data(quiz_right=opts[right])
+    rows = [[b(opts[i], f"g:qa:{int(i == right)}", "primary")] for i in order]
+    await c.message.answer(f"❓ <b>Viktorina</b>\n\n{html.escape(question)}", reply_markup=kb(*rows))
+
+
+@dp.callback_query(F.data.startswith("g:qa:"))
+async def quiz_answer(c: CallbackQuery, state: FSMContext):
+    right = (await state.get_data()).get("quiz_right", "")
+    ok = c.data.endswith("1")
+    await c.message.edit_reply_markup(reply_markup=None)
+    await c.message.answer(("✅ To'g'ri! 🎉" if ok else f"❌ Noto'g'ri. To'g'ri javob: <b>{html.escape(right)}</b>"),
+                           reply_markup=kb([b("➡️ Keyingi savol", "g:quiz", "success")], [b("⬅️ O'yinlar", "g:home", "danger")]))
+    await c.answer()
+
+
+@dp.callback_query(F.data == "g:word")
+async def word_game(c: CallbackQuery, state: FSMContext):
+    await c.answer()
+    w = random.choice(WORDS)
+    letters = list(w)
+    while "".join(letters) == w and len(set(w)) > 1:
+        random.shuffle(letters)
+    await _ask(c, state, f"Harflardan so'z tuzing: {' '.join(letters).upper()}", w, "🔤 <b>So'z top</b>")
+
+
+@dp.callback_query(F.data == "g:emoji")
+async def emoji_game(c: CallbackQuery, state: FSMContext):
+    await c.answer("⏳")
+    res = await ai("Mashhur film, multfilm yoki maqolni 2-4 ta emoji bilan ifodala. Javob o'zbekcha. "
+                   "Format aynan: EMOJI: <emojilar>\nJAVOB: <nomi>")
+    if res and "JAVOB:" in res:
+        e, a = res.split("JAVOB:", 1)
+        e = e.replace("EMOJI:", "").strip()
+    else:
+        e, a = random.choice(EMOJI_FALLBACK)
+    await _ask(c, state, f"Bu qaysi film/multfilm?  {e}", a.strip(), "🎬 <b>Emoji topishmoq</b>")
+
+
+RPS = {"tosh": ("🪨", "qaychi"), "qaychi": ("✂️", "qog'oz"), "qog'oz": ("📄", "tosh")}
+
+
+@dp.callback_query(F.data == "g:rps")
+async def rps(c: CallbackQuery):
+    await c.answer()
+    await c.message.answer("✂️ Tanlang:", reply_markup=kb(
+        [b(f"{e} {k.title()}", f"g:rp:{k}", "primary") for k, (e, _) in RPS.items()], [b("⬅️ O'yinlar", "g:home", "danger")]))
+
+
+@dp.callback_query(F.data.startswith("g:rp:"))
+async def rps_play(c: CallbackQuery):
+    me, bot_pick = c.data[5:], random.choice(list(RPS))
+    res = "🤝 Durang!" if me == bot_pick else ("🎉 Siz yutdingiz!" if RPS[me][1] == bot_pick else "😎 Men yutdim!")
+    await c.message.edit_text(f"Siz: {RPS[me][0]}  ·  Bot: {RPS[bot_pick][0]}\n\n<b>{res}</b>",
+                              reply_markup=kb([b(f"{e} {k.title()}", f"g:rp:{k}", "primary") for k, (e, _) in RPS.items()],
+                                              [b("⬅️ O'yinlar", "g:home", "danger")]))
+    await c.answer()

@@ -44,8 +44,10 @@ class IsCheckSubChannels(filters.Filter):
                 if result.status not in ("member", "administrator", "creator"):
                     return True  # hali azo emas
             except Exception as e:
+                # Bot kanalda admin emas yoki kanal o'chirilgan - bu kanalni o'tkazib yuboramiz,
+                # aks holda HAMMA foydalanuvchi bloklanib qoladi
                 logger.warning(f"Kanal {channel} azolik tekshiruvi xatosi: {e}")
-                return True  # xato bo'lsa ham xavfsizlik uchun tekshirish talab qilamiz
+                continue
 
         # Barcha kanallarga azo ekan - keshlaymiz
         self._verified[user_id] = time.time()

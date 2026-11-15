@@ -5,11 +5,9 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 import json
 from keyboard_buttons.admin_keyboard import create_menu_buttons
 
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 # Handle back to main menu
 @dp.callback_query(lambda c: c.data == "back_to_menu")
@@ -17,17 +15,23 @@ async def back_to_main_menu(callback: CallbackQuery, state: FSMContext):
     # Clear all states completely
     await state.clear()
     await state.set_data({})
-    
+
     telegram_id = callback.from_user.id
     user = db.select_user_by_id(telegram_id=telegram_id)
     language = user[2] if user else "uz"
-    
+
     full_name = callback.from_user.full_name
-    
+
     # Send enhanced welcome message
     welcome_text = texts.get(language, {}).get("welcome_message", "Welcome!")
-    
-    await callback.message.edit_text(
+
+    # MUHIM: inline xabarni edit_text qilib Reply klaviatura berib bo'lmaydi
+    # (Telegram cheklovi) - shuning uchun eski xabarni o'chirib, yangisidan yuboramiz
+    try:
+        await callback.message.delete()
+    except Exception:
+        pass
+    await callback.message.answer(
         text=welcome_text.format(full_name=full_name),
         parse_mode='HTML',
         reply_markup=create_menu_buttons(language)

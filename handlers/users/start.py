@@ -5,12 +5,10 @@ from aiogram.filters import CommandStart, StateFilter
 from keyboard_buttons.admin_keyboard import create_menu_buttons, language
 from aiogram.fsm.context import FSMContext
 
-# JSON matnlarini yuklash
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+# JSON matnlarini yuklash (markaziy modul orqali)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 # /start komanda uchun handler
 # /start komanda uchun handler
@@ -21,7 +19,7 @@ async def start_command(message: Message, state: FSMContext):
     if len(parts) > 1 and parts[1].startswith("anon_"):
         token = parts[1].replace("anon_", "")
         from handlers.users.anonymous_system import is_rate_limited, AnonimStates, decode_anonymous_token
-        
+
         target_id = decode_anonymous_token(token)
         if target_id:
             if is_rate_limited(message.from_user.id):

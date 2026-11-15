@@ -16,11 +16,9 @@ import json
 
 
 
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 @dp.message(Command("about"), StateFilter("*"))
 async def help_commands(message: Message,state:FSMContext):

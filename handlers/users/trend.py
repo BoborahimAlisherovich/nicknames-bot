@@ -15,11 +15,9 @@ from aiogram import types
 import json
 import html
 
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 def is_guied_us_message(message_text):
     possible_texts = [
@@ -42,17 +40,8 @@ async def guied_us(message: Message, state: FSMContext):
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-NAMES_PER_PAGE = 1 
-NAMES_PER_PAGES = 10 
-
-def get_pagination_keyboard(current_page):
-    buttons = []
-    if current_page > 0:
-        buttons.append(InlineKeyboardButton(text="⬅️", callback_data=f"prev:{current_page - 1}"))
-    if (current_page + 1) * NAMES_PER_PAGE < len(allah_names):
-        buttons.append(InlineKeyboardButton(text="➡️", callback_data=f"next:{current_page + 1}"))
-    return InlineKeyboardMarkup(inline_keyboard=[buttons])
-
+NAMES_PER_PAGE = 1
+NAMES_PER_PAGES = 10
 
 def get_names_page(page):
     start = page * NAMES_PER_PAGE
@@ -82,43 +71,12 @@ def get_names_pages(page, telegram_id):
     ])
 
 
-@dp.message(F.text.in_(["🔥 Mashhur Stikerlar", "🔥 Popular Stickers", "🔥 Популярные стикеры"]), StateFilter("*"))
-async def send_names(message: types.Message, state: FSMContext):
-    await state.clear()
-    current_page = 0
-    telegram_id = message.from_user.id
-    user = db.select_user_by_id(telegram_id)
-    language = user[2] if user else "uz"
-    
-    sticker_title = texts.get(language, {}).get("sticker_title", "🔥 Popular Stickers")
-    
-    # Use HTML for better stability
-    sticker_data = get_names_page(current_page)
-    await message.answer(
-        text=f"<b>{sticker_title}</b>\n\n{sticker_data}",
-        reply_markup=get_pagination_keyboard(current_page),
-        parse_mode="HTML"
-    )
-
+# ESLATMA: "🔥 Mashhur Stikerlar" endi handlers/users/stikers.py da yangi
+# versiyada (paket linklar + shaxsiy kolleksiya + inline). Eski emoji-art
+# paginatsiya o'chirildi.
 @dp.callback_query(lambda c: c.data and (c.data.startswith('next:') or c.data.startswith('prev:')))
 async def process_pagination(callback_query: types.CallbackQuery, state: FSMContext):
-    action, page = callback_query.data.split(':')
-    current_page = int(page)
-    telegram_id = callback_query.from_user.id
-    user = db.select_user_by_id(telegram_id)
-    language = user[2] if user else "uz"
-    
-    sticker_title = texts.get(language, {}).get("sticker_title", "🔥 Popular Stickers")
-    sticker_data = get_names_page(current_page)
-    
-    try:
-        await callback_query.message.edit_text(
-            text=f"<b>{sticker_title}</b>\n\n{sticker_data}",
-            reply_markup=get_pagination_keyboard(current_page),
-            parse_mode="HTML"
-        )
-    except:
-        pass
+    # Eski stiker paginatsiyasi - endi foydalanilmaydi (stikers.py ga ko'chdi)
     await callback_query.answer()
 
 @dp.message(F.text.in_(["✨ Top nik", "✨ Top Nick", "✨ Топ ник"]), StateFilter("*"))

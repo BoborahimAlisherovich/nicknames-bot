@@ -32,11 +32,9 @@ async def back_to_menu(message: Message, state: FSMContext):
 
 
 
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 def is_guied_us_message(message_text):
     possible_texts = [

@@ -9,8 +9,8 @@ from states.bulimlar import ChannelStates
 from aiogram.fsm.context import FSMContext
 from keyboard_buttons import admin_keyboard
 from keyboard_buttons.admin_keyboard import create_menu_buttons
-from aiogram.exceptions import ClientDecodeError
-import time
+from aiogram.exceptions import ClientDecodeError, TelegramRetryAfter, TelegramForbiddenError
+import asyncio
 import json
 import html
 import aiohttp
@@ -20,8 +20,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-texts_cache = None
+from data.texts import get_texts
 
 
 async def get_chat_safe(chat_id):
@@ -42,13 +41,6 @@ async def get_chat_safe(chat_id):
         result = data["result"]
         title = result.get("title") or result.get("username") or str(result.get("id", chat_id))
         return SimpleNamespace(id=result.get("id", chat_id), title=title)
-
-def get_texts():
-    global texts_cache
-    if texts_cache is None:
-        with open("languages.json", "r", encoding="utf-8") as f:
-            texts_cache = json.load(f)
-    return texts_cache
 
 
 @dp.message(IsCheckSubChannels(), lambda message: not (message.text and message.text.startswith("/start")))
@@ -72,8 +64,8 @@ async def kanalga_obuna(message: Message, state: FSMContext):
                 url=(await bot.create_chat_invite_link(int(channel))).invite_link
             ))
             valid_channels.append(channel)
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Kanal {channel} haqida ma'lumot olishda xato: {e}")
 
     if not valid_channels:
         return
@@ -106,6 +98,10 @@ async def check_subscription_callback(callback: CallbackQuery):
 
     await callback.answer("Barcha kanallarga azo siz! ✅")
     await callback.message.delete()
+
+    # Azo bo'ldi - keshga yozamiz, keyingi 10 daqiqa qayta tekshirilmaydi
+    from filterss.check_sub_channel import IsCheckSubChannels
+    IsCheckSubChannels.mark_verified(user_id)
 
     user = db.select_user_by_id(telegram_id=user_id)
     language = user[2] if user else "uz"
@@ -143,14 +139,35 @@ async def send_advert(message: Message, state: FSMContext):
     from_chat_id = message.from_user.id
     users = db.all_users_id()
     count = 0
+    blocked = 0
+    failed = 0
     for user in users:
         try:
             await bot.copy_message(chat_id=user[0], from_chat_id=from_chat_id, message_id=message_id)
             count += 1
-        except:
-            pass
-        time.sleep(0.01)
-    await message.answer(f"Reklama {count} ta foydalanuvchiga yuborildi")
+        except TelegramRetryAfter as e:
+            # Telegram flood limit - qancha kutish kerakligini o'zi aytadi
+            logger.warning(f"Telegram FloodWait: {e.retry_after}s kutamiz...")
+            await asyncio.sleep(e.retry_after + 1)
+            try:
+                await bot.copy_message(chat_id=user[0], from_chat_id=from_chat_id, message_id=message_id)
+                count += 1
+            except Exception as err:
+                logger.warning(f"Reklama qayta yuborilmadi (user {user[0]}): {err}")
+                failed += 1
+        except TelegramForbiddenError:
+            # Foydalanuvchi botni bloklagan
+            blocked += 1
+        except Exception as e:
+            logger.warning(f"Reklama yuborilmadi (user {user[0]}): {e}")
+            failed += 1
+        # Bloklovchi kutish emas! Boshqa foydalanuvchilar xabarlari shu paytda ham ishlaydi
+        await asyncio.sleep(0.05)
+    await message.answer(
+        f"✅ Reklama {count} ta foydalanuvchiga yuborildi\n"
+        f"🚫 Bloklagan: {blocked} ta\n"
+        f"⚠️ Yuborilmadi: {failed} ta"
+    )
     await state.clear()
 
 
@@ -178,21 +195,21 @@ async def add_channel_handle(message: Message, state: FSMContext):
         try:
             chat = await get_chat_safe(f"invite/{invite_hash}")
             kanal_id = str(chat.id)
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Private kanal linkini tekshirish xatosi ({text}): {e}")
     elif text.startswith("https://t.me/"):
         username = text.split("https://t.me/")[1].split("/")[0]
         try:
             chat = await get_chat_safe(f"@{username}")
             kanal_id = str(chat.id)
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Kanal linkini tekshirish xatosi ({text}): {e}")
     elif text.startswith("@"):
         try:
             chat = await get_chat_safe(text)
             kanal_id = str(chat.id)
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"Kanal username'ini tekshirish xatosi ({text}): {e}")
     elif text.lstrip("-").isdigit():
         kanal_id = text
 
@@ -239,7 +256,8 @@ async def list_channels(message: Message, state: FSMContext):
         try:
             chat = await get_chat_safe(int(ch))
             text += f"{idx}. {chat.title}\n"
-        except:
+        except Exception as e:
+            logger.warning(f"Kanal {ch} topilmadi: {e}")
             text += f"{idx}. {ch} (topilmadi)\n"
         keyboard.add(InlineKeyboardButton(
             text=f"Ochirish {idx}",

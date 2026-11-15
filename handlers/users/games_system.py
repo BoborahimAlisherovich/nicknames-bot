@@ -1,4 +1,6 @@
 import asyncio
+import json
+import logging
 import random
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -6,8 +8,12 @@ from aiogram.fsm.context import FSMContext
 from loader import dp, db
 from aiogram.filters import StateFilter
 from aiogram import F
-import json
 import html
+
+logger = logging.getLogger(__name__)
+
+# Rasmlar yuklanmaganda ishlatiladigan tekshirilgan (real) rasm
+SAFE_FALLBACK_IMAGE = "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/231cb237ab22763a61c2ca0eac6a3760/subway-surfers.png"
 
 # 30 high-quality, mobile-optimized games with real working links and verified images
 FALLBACK_GAMES = [
@@ -61,11 +67,9 @@ class GamesSystem:
 
 games_system = GamesSystem()
 
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 @dp.message(F.text.in_(["🎮 O'yinlar", "🎮 Games", "🎮 Игры"]), StateFilter("*"))
 async def games_menu_handler(message: Message, state: FSMContext):
@@ -113,12 +117,20 @@ async def send_game_card(message: Message, game, has_next, has_prev, page, langu
             reply_markup=keyboard.as_markup(), 
             parse_mode="HTML"
         )
-    except Exception:
-        # Fallback to a placeholder if even these Fail
-        placeholder = "https://play-lh.googleusercontent.com/W-vSjZ9O9O8_Z_9J0O_Z9o8bC-E_8YQ_yFv98L83-qXCHo9KqfEa1L68_Zp1CunK1B9T2X3P"
+    except Exception as e:
+        # 1-daraja: o'yin rasmi yuklanmadi - tekshirilgan rasmga o'tamiz
+        logger.warning(f"O'yin rasmi yuklanmadi ({game['name']}): {e}")
         try:
-            await message.answer_photo(photo=placeholder, caption=caption, reply_markup=keyboard.as_markup(), parse_mode="HTML")
-        except:
+            await message.answer_photo(
+                photo=SAFE_FALLBACK_IMAGE, 
+                caption=caption, 
+                reply_markup=keyboard.as_markup(), 
+                parse_mode="HTML"
+            )
+        except Exception as e2:
+            # 2-daraja: rasm umuman yuborilmadi - matnli kartochka (har doim ishlaydi)
+            logger.warning(f"Fallback rasm ham yuklanmadi ({game['name']}): {e2}")
+            caption += f"\n🖼 <a href='{game['url']}'>🖼 Rasmni ochish</a>"
             await message.answer(caption, reply_markup=keyboard.as_markup(), parse_mode="HTML")
 
 @dp.callback_query(lambda c: c.data.startswith("game_page_"))

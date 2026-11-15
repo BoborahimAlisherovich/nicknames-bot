@@ -6,11 +6,9 @@ import json
 from keyboard_buttons.admin_keyboard import create_menu_buttons
 from aiogram.fsm.context import FSMContext
 
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 @dp.message(Command("help"), StateFilter("*"))
 async def help_commands(message: Message,state:FSMContext):

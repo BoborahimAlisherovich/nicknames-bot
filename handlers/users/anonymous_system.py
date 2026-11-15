@@ -19,21 +19,29 @@ class AnonimStates(StatesGroup):
     AnonimJavobQaytarish = State()
 
 def generate_anonymous_token(user_id):
-    """Generate stateless secure unique token for anonymous messages using hex."""
-    return hex(user_id)[2:]
+    """Xavfsiz anonim token yaratadi va bazaga saqlaydi.
+
+    Ilgari token shunchaki hex(user_id) edi — istagan odam
+    hexni desimalga qaytarib, kim ekanligini bilib olardi.
+    Endi kriptografik tasodifiy 32 belgili token beriladi,
+    tokenda user_id umuman yo'q (faqat bizning bazada bog'lanadi).
+    """
+    token = secrets.token_hex(16)
+    db.add_anon_token(token, user_id)
+    return token
 
 def decode_anonymous_token(token):
-    """Retrieve user_id from the hex token."""
+    """Token aslida kimniki ekanini bazadan topib beradi."""
     try:
         if token.startswith('anon_'):
             token = token[5:]
-        return int(token, 16)
+        return db.get_anon_user(token)
     except Exception:
         return None
 
 def generate_anonymous_link(token):
     """Generate anonymous message link"""
-    return f"https://t.me/niknames_new_bot?start=anon_{token}"
+    return f"https://t.me/smartrends_bot?start=anon_{token}"
 
 def is_rate_limited(user_id):
     """Check if user is rate limited for anonymous messages (5s cooldown)"""
@@ -45,14 +53,9 @@ def is_rate_limited(user_id):
     rate_limits[user_id] = now
     return False
 
-def load_texts():
-    try:
-        with open("languages.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return {}
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 @dp.message(F.text.in_(["🕵️ Anonim xabar", "🕵️ Anonymous Msg", "🕵️ Анонимное сообщение"]), StateFilter("*"))
 async def anonymous_menu_handler(message: Message, state: FSMContext):
@@ -114,6 +117,7 @@ async def handle_anon_message_delivery(message: Message, state: FSMContext):
 
     target_id = decode_anonymous_token(token)
     if not target_id:
+        await message.answer("❌ Bu anonim havola yaroqsiz.")
         await state.clear()
         return
 
@@ -134,7 +138,9 @@ async def handle_anon_message_delivery(message: Message, state: FSMContext):
         anonymous_tokens[token]['message_count'] += 1
         
         await message.answer("✅ Xabar yuborildi!")
-    except:
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Anonim xabar yuborilmadi ({target_id}): {e}")
         await message.answer("❌ Xabar yuborilmadi.")
     
     await state.clear()
@@ -161,7 +167,9 @@ async def deliver_anon_reply(message: Message, state: FSMContext):
         await message.bot.send_message(chat_id=int(target_id), text="🗣 **Anonim javob keldi:**", parse_mode="Markdown")
         await message.copy_to(chat_id=int(target_id), reply_markup=reply_markup.as_markup())
         await message.answer("✅ Yuborildi!")
-    except:
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Anonim javob yuborilmadi ({target_id}): {e}")
         await message.answer("❌ Xato.")
     await state.clear()
 

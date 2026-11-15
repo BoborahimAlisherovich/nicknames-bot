@@ -14,11 +14,9 @@ from .premium_nicknames import get_premium_nicknames, get_all_categories
 from .premium_fonts import transform_text_to_font, get_premium_font_styles, get_font_by_category, get_all_font_categories
 from .premium_reactions import get_random_reaction
 
-def load_texts():
-    with open("languages.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from data.texts import get_texts
 
-texts = load_texts()
+texts = get_texts()
 
 # Premium nickname categories handler
 @dp.message(lambda message: message.text in ["👑 Premium niklar", "👑 Premium Nicks", "👑 Премиум ники"], StateFilter("*"))

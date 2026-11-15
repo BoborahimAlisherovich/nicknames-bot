@@ -1,3 +1,7 @@
 BOT_TOKEN=BuYergaTokenYozing
 ADMINS=AdminIdsiniKiritinged
 CHANNELS=
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+CARDS=8600 0000 0000 0000
+CARD_OWNER=Ism Familiya

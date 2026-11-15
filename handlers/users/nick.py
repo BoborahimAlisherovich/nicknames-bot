@@ -1,12 +1,12 @@
-from aiogram.types import Message, InlineKeyboardButton
+from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
 from loader import dp, db
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import StateFilter
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
-from handlers.users.nick_generator import nick_generator
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.state import State, StatesGroup
 from keyboard_buttons.admin_keyboard import create_back_button, create_menu_buttons, texts
+from handlers.users.nick_ai import get_theme_buttons, generate_nicks, format_nicks_list
 import html
 
 class NickState(StatesGroup):
@@ -19,23 +19,44 @@ nick_button_texts = [
     texts["ru"]["menu"]["menu_button_11"]
 ]
 
+AI_THINKING = {
+    "uz": "🤖 AI ishlayapti... ijodiy niklar yaratilmoqda (5-10 sekund)",
+    "us": "🤖 AI is working... generating creative nicks (5-10 seconds)",
+    "ru": "🤖 AI работает... создаю креативные ники (5-10 секунд)",
+}
+AI_SOURCE = {
+    "uz": "🤖 AI yaratdi",
+    "us": "🤖 Made by AI",
+    "ru": "🤖 Создано AI",
+}
+LOCAL_SOURCE = {
+    "uz": "⚡ Lokal generator",
+    "us": "⚡ Local generator",
+    "ru": "⚡ Локальный генератор",
+}
+CHOOSE_THEME = {
+    "uz": "🎨 Kayfiyat/mavzu tanlang — AI sizga mos ijodiy niklar yaratadi:",
+    "us": "🎨 Pick a vibe/theme — AI will create creative nicks for you:",
+    "ru": "🎨 Выберите настроение/тему — AI создаст креативные ники:",
+}
+
 # Use state="*" to ensure the menu button works regardless of current state
 @dp.message(F.text.in_(nick_button_texts), StateFilter("*"))
 async def ask_nick_name(message: types.Message, state: FSMContext):
     # Clear any previous state
     await state.clear()
     await state.set_state(NickState.WaitingForName)
-    
+
     telegram_id = message.from_user.id
     user = db.select_user_by_id(telegram_id=telegram_id)
     language = user[2] if user else "uz"
-    
+
     prompt = {
-        "uz": "✍️ Iltimos, nick yaratish uchun ismingizni yozib yuboring:",
-        "us": "✍️ Please enter your name to create a nick:",
-        "ru": "✍️ Пожалуйста, введите свое имя для создания ника:"
+        "uz": "✍️ Ismingizni yozib yuboring — fontlardan tashqari endi 🤖 AI ijodiy niklar ham yaratib beradi:",
+        "us": "✍️ Send your name — besides fonts, 🤖 AI now creates creative nicknames too:",
+        "ru": "✍️ Напишите своё имя — теперь 🤖 AI тоже создаёт креативные ники:"
     }
-    
+
     await message.answer(
         prompt.get(language, prompt["us"]),
         reply_markup=create_back_button(language)
@@ -47,7 +68,7 @@ async def generate_short_nicks(message: types.Message, state: FSMContext):
     telegram_id = message.from_user.id
     user = db.select_user_by_id(telegram_id=telegram_id)
     language = user[2] if user else "uz"
-    
+
     # Check for back button
     back_btn_text = texts[language]["back_button"]
     if name == back_btn_text:
@@ -62,75 +83,110 @@ async def generate_short_nicks(message: types.Message, state: FSMContext):
         await state.clear()
         return
 
-    # Update data
+    # Update data (name saqlanadi - AI generatsiyada ishlatiladi)
     await state.update_data(name=name)
-    
-    # Generate
-    nicknames = nick_generator(name=name)
-    
-    if not nicknames:
-        await message.answer("❌ Natija topilmadi.")
-        return
 
-    page_size = 10
-    page_num = 0
-    total_pages = (len(nicknames) + page_size - 1) // page_size
-    paginated = nicknames[page_num * page_size:(page_num + 1) * page_size]
-    
-    res_title = {
-        "uz": "✨ <b>Siz uchun natijalar:</b>",
-        "us": "✨ <b>Results for you:</b>",
-        "ru": "✨ <b>Результаты для вас:</b>"
-    }
-    
-    text = f"{res_title.get(language, res_title['us'])}\n\n"
-    for idx, nick in enumerate(paginated, start=page_num * page_size + 1):
-        safe_nick = html.escape(nick.strip())
-        text += f"{idx}. <code>{safe_nick}</code>\n\n"
-    
+    # Kayfiyat/mavzu tanlash (AI). Eski shrift ro'yxati olib tashlandi -
+    # foydalanuvchi faqat mavzu tanlaydi.
     markup = InlineKeyboardBuilder()
-    if total_pages > 1:
-        if page_num < total_pages - 1:
-            markup.add(InlineKeyboardButton(text="➡️", callback_data=f"short_page_{page_num+1}"))
-    
-    await message.answer(text, reply_markup=markup.as_markup(), parse_mode="HTML")
+    theme_buttons = get_theme_buttons()
+    # 2 tadan qator
+    for i in range(0, len(theme_buttons), 2):
+        row = []
+        for cb, emoji, label in theme_buttons[i:i+2]:
+            row.append(InlineKeyboardButton(text=f"{emoji} {label}", callback_data=cb))
+        markup.row(*row)
 
-@dp.callback_query(lambda c: c.data.startswith("short_page_"))
-async def handle_short_page(callback_query: types.CallbackQuery, state: FSMContext):
-    data = callback_query.data.split("_")
-    page_num = int(data[2])
-    user_data = await state.get_data()
-    name = user_data.get('name')
-    
+    await message.answer(
+        CHOOSE_THEME.get(language, CHOOSE_THEME["us"]),
+        reply_markup=markup.as_markup()
+    )
+
+
+async def _render_ai_result(message, callback, name: str, theme_key: str, language: str, page: int = 0):
+    """AI lokal/zaxira generatsiya va natijani ko'rsatish (callback orqali ishlatilmaydi - aigen handlerida bajeriladi)."""
+    pass
+
+
+@dp.callback_query(F.data.startswith("aigen_"))
+async def ai_generate(callback: CallbackQuery, state: FSMContext):
+    theme_key = callback.data.replace("aigen_", "")
+    data = await state.get_data()
+    name = data.get("name")
     if not name:
-        # If name is lost (e.g. restart), we can't paginate
-        await callback_query.answer("❌ Ma'lumot vaqti o'tib ketgan.")
+        await callback.answer("❌ Avval ismingizni yuboring!", show_alert=True)
         return
 
-    nicknames = nick_generator(name=name)
-    user = db.select_user_by_id(telegram_id=callback_query.from_user.id)
+    user = db.select_user_by_id(telegram_id=callback.from_user.id)
     language = user[2] if user else "uz"
 
-    page_size = 10
-    total_pages = (len(nicknames) + page_size - 1) // page_size
-    paginated = nicknames[page_num * page_size:(page_num + 1) * page_size]
-    
-    page_title = {
-        "uz": f"✨ <b>Natijalar (Sahifa {page_num + 1}):</b>\n\n",
-        "us": f"✨ <b>Results (Page {page_num + 1}):</b>\n\n",
-        "ru": f"✨ <b>Результаты (Страница {page_num + 1}):</b>\n\n"
-    }
+    await callback.message.answer(AI_THINKING.get(language, AI_THINKING["uz"]))
 
-    text = page_title.get(language, page_title["us"])
-    for idx, nick in enumerate(paginated, start=page_num * page_size + 1):
-        safe_nick = html.escape(nick.strip())
-        text += f"{idx}. <code>{safe_nick}</code>\n\n"
+    # natijalarni to'liq ko'rsatish
+    nicks, source = await generate_nicks(name, theme_key, language, count=20)
+    source_label = AI_SOURCE.get(language, "🤖 AI") if source == "ai" else LOCAL_SOURCE.get(language, "⚡ Local")
+    title = f"{source_label} · {theme_key.title()}"
+
+    page_size = 10
+    total_pages = (len(nicks) + page_size - 1) // page_size
+    paginated = nicks[0:page_size]
+
+    text = format_nicks_list(paginated, title)
 
     markup = InlineKeyboardBuilder()
-    if page_num > 0:
-        markup.add(InlineKeyboardButton(text="⬅️", callback_data=f"short_page_{page_num-1}"))
-    if page_num < total_pages - 1:
-        markup.add(InlineKeyboardButton(text="➡️", callback_data=f"short_page_{page_num+1}"))
+    nav = []
+    if total_pages > 1:
+        nav.append(InlineKeyboardButton(text="➡️", callback_data=f"aipage_{theme_key}_1"))
+    if nav:
+        markup.row(*nav)
+    markup.row(InlineKeyboardButton(
+        text="🔄 Yana generatsiya",
+        callback_data=f"aigen_{theme_key}"
+    ))
 
-    await callback_query.message.edit_text(text, reply_markup=markup.as_markup(), parse_mode="HTML")
-    await callback_query.answer()
+    await callback.message.answer(text, parse_mode="HTML", reply_markup=markup.as_markup())
+    # ismni saqlab qolish (keyingi generatsiyalar uchun)
+    await state.update_data(name=name)
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("aipage_"))
+async def ai_page(callback: CallbackQuery, state: FSMContext):
+    parts = callback.data.split("_")
+    # aipage_{theme}_{page}
+    theme_key = parts[1]
+    page = int(parts[2])
+    data = await state.get_data()
+    name = data.get("name")
+    if not name:
+        await callback.answer("❌ Ma'lumot vaqti o'tib ketgan.", show_alert=True)
+        return
+
+    user = db.select_user_by_id(telegram_id=callback.from_user.id)
+    language = user[2] if user else "uz"
+
+    # saqlangan natijalar yo'q - qayta generatsiya (local tez, AI sekinroq)
+    nicks, source = await generate_nicks(name, theme_key, language, count=20)
+    source_label = AI_SOURCE.get(language, "🤖 AI") if source == "ai" else LOCAL_SOURCE.get(language, "⚡ Local")
+    title = f"{source_label} · {theme_key.title()}"
+
+    page_size = 10
+    total_pages = (len(nicks) + page_size - 1) // page_size
+    paginated = nicks[page*page_size:(page+1)*page_size]
+
+    text = format_nicks_list(paginated, title)
+    markup = InlineKeyboardBuilder()
+    nav = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="⬅️", callback_data=f"aipage_{theme_key}_{page-1}"))
+    if page < total_pages - 1:
+        nav.append(InlineKeyboardButton(text="➡️", callback_data=f"aipage_{theme_key}_{page+1}"))
+    if nav:
+        markup.row(*nav)
+    markup.row(InlineKeyboardButton(text="🔄 Yana generatsiya", callback_data=f"aigen_{theme_key}"))
+
+    try:
+        await callback.message.edit_text(text, parse_mode="HTML", reply_markup=markup.as_markup())
+    except Exception:
+        await callback.message.answer(text, parse_mode="HTML", reply_markup=markup.as_markup())
+    await callback.answer()

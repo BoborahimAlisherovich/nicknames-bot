@@ -48,6 +48,10 @@ admin_button = ReplyKeyboardMarkup(
             KeyboardButton(text="Kanal qoshish"),
             KeyboardButton(text="Kanallar royhati"),
         ],
+        [
+            KeyboardButton(text="🔑 Gemini API", style="primary"),
+            KeyboardButton(text="💳 Kartalar", style="success"),
+        ],
     ],
    resize_keyboard=True,
    input_field_placeholder="Menudan birini tanlang"

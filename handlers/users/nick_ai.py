@@ -16,7 +16,8 @@ import certifi
 
 _SSL = ssl.create_default_context(cafile=certifi.where())
 
-from data.config import GEMINI_API_KEY, GEMINI_MODEL
+from data import settings
+from data.config import GEMINI_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,8 @@ def get_theme_buttons() -> list[tuple]:
 
 async def generate_ai_nicks(name: str, theme_key: str, language: str = "uz", count: int = 10) -> list[str] | None:
     """Gemini orqali ijodiy niklar. Xato/limit bo'lsa None qaytaradi."""
-    if not GEMINI_API_KEY:
+    key = settings.gemini_key()
+    if not key:
         return None
 
     theme = THEMES.get(theme_key, THEMES["gaming"])
@@ -162,7 +164,7 @@ async def generate_ai_nicks(name: str, theme_key: str, language: str = "uz", cou
     try:
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=_SSL)) as session:
             async with session.post(
-                f"{GEMINI_URL}?key={GEMINI_API_KEY}",
+                f"{GEMINI_URL}?key={key}",
                 json=payload,
                 timeout=aiohttp.ClientTimeout(total=25),
             ) as resp:

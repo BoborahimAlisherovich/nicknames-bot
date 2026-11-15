@@ -37,6 +37,7 @@ def setup_middlewares(dispatcher: Dispatcher, bot: Bot) -> None:
 async def main() -> None:
     await set_default_commands(bot)
     db.create_table_users()
+    db.create_table_settings()
     db.create_table_channels()
     db.create_table_anon_tokens()
     db.create_table_stickers()

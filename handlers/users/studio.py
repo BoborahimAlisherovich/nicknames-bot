@@ -19,7 +19,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import (CallbackQuery, CopyTextButton, InlineKeyboardButton,
                            InlineKeyboardMarkup, LabeledPrice, Message, PreCheckoutQuery)
 
-from data.config import ADMINS, CARD_OWNER, CARDS, GEMINI_API_KEY, GEMINI_MODELS
+from data import settings
+from data.config import ADMINS, GEMINI_MODELS
 from loader import bot, dp
 
 log = logging.getLogger(__name__)
@@ -80,7 +81,8 @@ SECTIONS = {
 
 
 async def ai(prompt: str) -> str | None:
-    if not GEMINI_API_KEY:
+    key = settings.gemini_key()
+    if not key:
         return None
     body = {"contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": 1.0, "maxOutputTokens": 1024}}
@@ -88,7 +90,7 @@ async def ai(prompt: str) -> str | None:
         for model in GEMINI_MODELS:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
             try:
-                async with s.post(url, params={"key": GEMINI_API_KEY}, json=body,
+                async with s.post(url, params={"key": key}, json=body,
                                   timeout=aiohttp.ClientTimeout(total=30)) as r:
                     data = await r.json(content_type=None)
                     return data["candidates"][0]["content"]["parts"][0]["text"].strip()
@@ -248,7 +250,7 @@ async def riddle_show(c: CallbackQuery, state: FSMContext):
 def donate_kb():
     rows = [[b(f"⭐ {n}", f"d:s:{n}", "primary") for n in STAR_PRESETS[i:i + 3]] for i in (0, 3)]
     rows.append([b("✏️ Boshqa miqdor", "d:custom", "success")])
-    if CARDS:
+    if settings.cards():
         rows.append([b("💳 Karta orqali", "d:card", "success")])
     rows.append([BACK])
     return kb(*rows)
@@ -321,11 +323,12 @@ async def paid(m: Message):
 @dp.callback_query(F.data == "d:card")
 async def card(c: CallbackQuery):
     rows = [[InlineKeyboardButton(text=f"📋 {n}", copy_text=CopyTextButton(text=n.replace(' ', '')), style="primary")]
-            for n in CARDS]
+            for n in settings.cards()]
     rows.append([b("✅ To'ladim (chek yuborish)", "d:chk", "success")])
     rows.append([b("⬅️ Orqaga", "d:home", "danger")])
-    cards = "\n".join(f"💳 <code>{n}</code>" for n in CARDS)
-    owner = f"\n👤 {html.escape(CARD_OWNER)}" if CARD_OWNER else ""
+    cards = "\n".join(f"💳 <code>{n}</code>" for n in settings.cards())
+    owner_name = settings.card_owner()
+    owner = f"\n👤 {html.escape(owner_name)}" if owner_name else ""
     await c.message.edit_text(f"💳 <b>Karta orqali donat</b>\n\n{cards}{owner}\n\n"
                               "Raqamni nusxalash uchun tugmani bosing. To'lovdan so'ng chekni yuboring.",
                               reply_markup=kb(*rows))

@@ -1,3 +1,4 @@
+from . import admin_settings
 from . import admin
 from . import start
 from . import nick

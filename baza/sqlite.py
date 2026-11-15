@@ -256,5 +256,16 @@ class Database:
         sql = "SELECT id, file_id, title FROM SharedStickers WHERE title LIKE ? ORDER BY id DESC LIMIT 20"
         return self.execute(sql, parameters=(f"%{query}%",), fetchall=True)
 
+    # ---------------- Sozlamalar (admin paneldan o'zgaradi) ----------------
+    def create_table_settings(self):
+        self.execute("CREATE TABLE IF NOT EXISTS Settings(key TEXT PRIMARY KEY, value TEXT)", commit=True)
+
+    def get_setting(self, key: str):
+        row = self.execute("SELECT value FROM Settings WHERE key=?", (key,), fetchone=True)
+        return row[0] if row else None
+
+    def set_setting(self, key: str, value: str):
+        self.execute("INSERT OR REPLACE INTO Settings(key, value) VALUES(?, ?)", (key, value), commit=True)
+
 # Create database instance
 db = Database()

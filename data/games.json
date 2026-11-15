@@ -1,0 +1,387 @@
+[
+ {
+  "name": "Subway Surfers",
+  "description": "Dunyodagi eng mashhur runner! Politsiyadan qoching, poyezdlar ustida yuguring va tanga yig'ing.",
+  "category": "🏃 Runner",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/51546e43d8d4e544f5a4fa0341d958d3/subway-surfers-logo.png",
+  "url": "https://poki.com/en/g/subway-surfers"
+ },
+ {
+  "name": "Temple Run 2",
+  "description": "Qadimiy ibodatxonadan qoching! Burilish, sakrash va sirpanish bilan to'siqlardan o'ting.",
+  "category": "🏃 Runner",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/b5c8b617f65be7cc4d56dd3657590ae7/temple-run-2-logo.png",
+  "url": "https://poki.com/en/g/temple-run-2"
+ },
+ {
+  "name": "Jetpack Joyride",
+  "description": "Reaktiv ryukzak bilan laboratoriyadan qoching, lazerlar va raketalardan chetlaning.",
+  "category": "🏃 Runner",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/d5d34cb9ce7b617b93338982aa0958ab/jetpack-joyride-logo.png",
+  "url": "https://poki.com/en/g/jetpack-joyride"
+ },
+ {
+  "name": "Tunnel Rush",
+  "description": "Tez tunnel bo'ylab uching va rangli to'siqlarga urilmang. Reaksiyangizni sinang!",
+  "category": "🏃 Runner",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/2094926076b7aa8264cace220ce5decc/tunnel-rush-logo.png",
+  "url": "https://poki.com/en/g/tunnel-rush"
+ },
+ {
+  "name": "Dino Run",
+  "description": "Dinozavr bilan meteoritlar yomg'iridan qoching va tuxumlar yig'ing.",
+  "category": "🏃 Runner",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/777ba4f6c817ab66516f768a111109d8/dino-run-logo.png",
+  "url": "https://poki.com/en/g/dino-run"
+ },
+ {
+  "name": "Dino Game",
+  "description": "Klassik Chrome dinozavri! Kaktuslar ustidan sakrab, rekord o'rnating.",
+  "category": "🏃 Runner",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/9afd3b92ab41ffca7f368a8fcbd6d39a75894efe0edbc14cf1f067cf625e6678/dinosaur-game-logo.png",
+  "url": "https://poki.com/en/g/dinosaur-game"
+ },
+ {
+  "name": "Stickman Hook",
+  "description": "Arqon bilan ilinib, akrobatik sakrashlar qiling va marraga yeting.",
+  "category": "⚡ Action",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/99e090d154caf30f3625df7e456d5984/stickman-hook-logo.png",
+  "url": "https://poki.com/en/g/stickman-hook"
+ },
+ {
+  "name": "Fruit Ninja",
+  "description": "Mevalarni qilich bilan qirqing, lekin bombalarga tegmang!",
+  "category": "⚡ Action",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/c4dc286c30b8fbde45a0b5d4fe6f2146/fruit-ninja-logo.png",
+  "url": "https://poki.com/en/g/fruit-ninja"
+ },
+ {
+  "name": "Smash Karts",
+  "description": "Onlayn karting jangi: qurollar to'plang va raqiblarni yengib o'ting.",
+  "category": "⚡ Action",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/9c9e529b14731be871b07b89660bbc2a/smash-karts-logo.png",
+  "url": "https://poki.com/en/g/smash-karts"
+ },
+ {
+  "name": "Venge.io",
+  "description": "Tezkor onlayn shuter: jamoa bo'lib jang qiling va ochko yig'ing.",
+  "category": "🔫 Shooter",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/a2ddd7d16a599f8f01b65a3bc453e698/venge-io-logo.png",
+  "url": "https://poki.com/en/g/venge-io"
+ },
+ {
+  "name": "Getaway Shootout",
+  "description": "Ikki kishilik kulgili otishma: qurol oling va birinchi bo'lib qoching.",
+  "category": "🔫 Shooter",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/7e6806e76a4f8ad5b7a8ab8d1d42a74b/getaway-shootout-logo.png",
+  "url": "https://poki.com/en/g/getaway-shootout"
+ },
+ {
+  "name": "Rooftop Snipers",
+  "description": "Tom ustida snayperlar dueli! Raqibni tomdan qulating.",
+  "category": "🔫 Shooter",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/c127771edb0e821e4109b7058ae3f094/rooftop-snipers-logo.jpeg",
+  "url": "https://poki.com/en/g/rooftop-snipers"
+ },
+ {
+  "name": "Stick Merge",
+  "description": "Qurollarni birlashtirib kuchaytiring va stickman dushmanlarni yo'q qiling.",
+  "category": "🔫 Shooter",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/3b3f4aeacf600fd3910f1c3d513c0636/stick-merge-logo.png",
+  "url": "https://poki.com/en/g/stick-merge"
+ },
+ {
+  "name": "House of Hazards",
+  "description": "Uydagi tuzoqlardan o'ting va do'stlaringizga xalaqit bering — kulgili musobaqa!",
+  "category": "🤪 Ko'p o'yinchi",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/0609b0ba2889859b21cf47ca205818fe/house-of-hazards-logo.png",
+  "url": "https://poki.com/en/g/house-of-hazards"
+ },
+ {
+  "name": "Level Devil",
+  "description": "Har qadamda tuzoq! Kutilmagan to'siqlar bilan to'la aqldan ozdiruvchi platformer.",
+  "category": "🧠 Platformer",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/701e10b108ed7a0c68c738c46c9a705a/level-devil-logo.png",
+  "url": "https://poki.com/en/g/level-devil"
+ },
+ {
+  "name": "G-Switch 3",
+  "description": "Gravitatsiyani almashtirib yuguring. Bir tugma — cheksiz qiyinchilik!",
+  "category": "🧠 Platformer",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/7f53593c-4090-4cc5-a934-6a5e599d8eaa/g-switch-3-logo.png",
+  "url": "https://poki.com/en/g/g-switch-3"
+ },
+ {
+  "name": "Stickman Climb!",
+  "description": "Stickman bilan devorlarga tirmashib, eng yuqoriga chiqing.",
+  "category": "🧠 Platformer",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/77e18f5c999b56d24ca7ebfa493cac98/stickman-climb-logo.png",
+  "url": "https://poki.com/en/g/stickman-climb"
+ },
+ {
+  "name": "Dreadhead Parkour",
+  "description": "Shahar bo'ylab parkur: sakrang, sirpaning va tezlikni yo'qotmang.",
+  "category": "🧠 Platformer",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/5f983c03072b3e1997e214130a98a199/dreadhead-parkour-logo.png",
+  "url": "https://poki.com/en/g/dreadhead-parkour"
+ },
+ {
+  "name": "Temple of Boom",
+  "description": "Ibodatxonada portlovchi sarguzasht: dushmanlarni yengib, xazinani toping.",
+  "category": "🧠 Platformer",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/d710fe8830d731072485a582881605ea/temple-of-boom-logo.png",
+  "url": "https://poki.com/en/g/temple-of-boom"
+ },
+ {
+  "name": "Bad Ice-Cream",
+  "description": "Muzqaymoq bo'lib mevalarni yig'ing va muz devorlar bilan dushmanlardan himoyalaning.",
+  "category": "🧠 Platformer",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/1cdb5c1a8c09ec5f8052a6c12bf6c79b/bad-ice-cream-logo.png",
+  "url": "https://poki.com/en/g/bad-ice-cream"
+ },
+ {
+  "name": "Duck Life",
+  "description": "O'rdakchangizni mashq qildiring va poygalarda chempion bo'ling.",
+  "category": "🧠 Platformer",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/d0048d89-e4fa-4adb-9c77-adc51e4e1c6b/duck-life-logo.png",
+  "url": "https://poki.com/en/g/duck-life"
+ },
+ {
+  "name": "Moto X3M",
+  "description": "Ekstremal mototsikl poygasi: salto qiling va tuzoqlardan omon qoling.",
+  "category": "🏍 Poyga",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/2c6d5a46cdbceada277c870ce1c389ee/moto-x3m-logo.jpg",
+  "url": "https://poki.com/en/g/moto-x3m"
+ },
+ {
+  "name": "Moto X3M Spooky Land",
+  "description": "Moto X3M ning dahshatli versiyasi: qorong'i trassalarda poyga.",
+  "category": "🏍 Poyga",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/3f8a297822df891a1c158576b6461014/moto-x3m-spooky-land-logo.png",
+  "url": "https://poki.com/en/g/moto-x3m-spooky-land"
+ },
+ {
+  "name": "3D Moto Simulator 2",
+  "description": "Ochiq dunyoda 3D mototsikl simulyatori. Tryuklar va tezlik!",
+  "category": "🏍 Poyga",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/00adfbbd-b6ea-40ac-8c88-2be9ce0e5551/3d-moto-simulator-2-logo.png",
+  "url": "https://poki.com/en/g/3d-moto-simulator-2"
+ },
+ {
+  "name": "Drive Mad",
+  "description": "Mashinani ag'darib yubormasdan qiyin trassalardan olib o'ting.",
+  "category": "🚗 Poyga",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/591d984dcac4fb694f3f8195bb8f6118/drive-mad-logo.png",
+  "url": "https://poki.com/en/g/drive-mad"
+ },
+ {
+  "name": "Drift Boss",
+  "description": "Bitta tugma bilan drift qiling va yo'ldan tushib ketmang.",
+  "category": "🚗 Poyga",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/baf55f009fd63dd63c760a5dcfe79615/drift-boss-logo.png",
+  "url": "https://poki.com/en/g/drift-boss"
+ },
+ {
+  "name": "Crazy Cars",
+  "description": "Tez mashinalar bilan aqldan ozdiruvchi trassalarda poyga.",
+  "category": "🚗 Poyga",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/2bc8004fcbb4387908a636e2a9d9ab4a/crazy-cars-logo.png",
+  "url": "https://poki.com/en/g/crazy-cars"
+ },
+ {
+  "name": "Parking Fury 3D",
+  "description": "Mashinani urilmasdan to'g'ri joyga park qiling. Haydash mahoratingizni sinang.",
+  "category": "🚗 Poyga",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/65ae9fd0-838b-4c1d-a0f6-59b513084d1b/parking-fury-3d-logo.png",
+  "url": "https://poki.com/en/g/parking-fury-3d"
+ },
+ {
+  "name": "Crossy Road",
+  "description": "Yo'l va daryolarni kesib o'ting, mashinalardan ehtiyot bo'ling!",
+  "category": "🕹 Arkada",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/76fc1b000203faf71b77a75b10022142/crossy-road-logo.png",
+  "url": "https://poki.com/en/g/crossy-road"
+ },
+ {
+  "name": "Blumgi Rocket",
+  "description": "Raketani boshqarib, to'siqlar orasidan marraga yetkazing.",
+  "category": "🕹 Arkada",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/672fb98802b00740e3c885cb2b31fc51/blumgi-rocket-logo.png",
+  "url": "https://poki.com/en/g/blumgi-rocket"
+ },
+ {
+  "name": "Idle Breakout",
+  "description": "Klassik g'isht sindirish o'yini — avtomatik to'plar bilan.",
+  "category": "🕹 Arkada",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/59a42104cf89164d41ed231574452322/idle-breakout-logo.png",
+  "url": "https://poki.com/en/g/idle-breakout"
+ },
+ {
+  "name": "YoHoHo.io",
+  "description": "Qaroqchilar jangi: orolda oxirgi tirik qolgan bo'ling!",
+  "category": "🕹 Arkada",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/9b373b5219cd66a82389d81d7cda8e23/yohoho-io-logo.jpeg",
+  "url": "https://poki.com/en/g/yohoho-io"
+ },
+ {
+  "name": "Hole.io",
+  "description": "Qora tuynuk bo'lib shaharni yutib yuboring. Qancha ko'p yesangiz, shuncha kattalashasiz.",
+  "category": "🕹 Arkada",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/6a2eb719b17f667cda6680a8bb2f4e40/hole-io-logo.jfif",
+  "url": "https://poki.com/en/g/hole-io"
+ },
+ {
+  "name": "Cats Love Cake 2",
+  "description": "Mushukchalarni tortga olib boring — gravitatsiya bilan boshqotirma.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/fde16b3a57d9d0d93bcffc83578b5a38/cats-love-cake-2-logo.png",
+  "url": "https://poki.com/en/g/cats-love-cake-2"
+ },
+ {
+  "name": "2048",
+  "description": "Raqamlarni birlashtirib 2048 ga yeting. Mantiqiy klassika!",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/cb8c967c-4a78-4ffa-8506-cbac69746f4f/2048-logo.png",
+  "url": "https://poki.com/en/g/2048"
+ },
+ {
+  "name": "Brain Test: Tricky Puzzles",
+  "description": "Ayyorona topishmoqlar: odatiy bo'lmagan yechimlarni toping.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/f262d83ee394fcf98b378674e1430bfd/brain-test-tricky-puzzles-logo.png",
+  "url": "https://poki.com/en/g/brain-test-tricky-puzzles"
+ },
+ {
+  "name": "Who Is?",
+  "description": "Kim yolg'on gapiryapti? Detektiv bo'lib sirlarni oching.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/373740bfb89dd3e6c1fb96674148e806/who-is-logo.png",
+  "url": "https://poki.com/en/g/who-is"
+ },
+ {
+  "name": "Water Color Sort",
+  "description": "Rangli suvlarni idishlarga saralang. Tinchlantiruvchi boshqotirma.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/bea9b33040f3776e709fbe8c6e23c623/water-color-sort-logo.png",
+  "url": "https://poki.com/en/g/water-color-sort"
+ },
+ {
+  "name": "Blocky Blast Puzzle",
+  "description": "Bloklarni joylashtirib qatorlarni to'ldiring va portlating.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/291aaf2dcf5c1322558a9c038b3c5251/blocky-blast-puzzle-logo.png",
+  "url": "https://poki.com/en/g/blocky-blast-puzzle"
+ },
+ {
+  "name": "Sudoku",
+  "description": "Klassik sudoku: 1 dan 9 gacha raqamlar bilan katakchalarni to'ldiring.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/fde33f9b7a0e003608c30f07e47bb4a4/sudoku-logo.png",
+  "url": "https://poki.com/en/g/sudoku"
+ },
+ {
+  "name": "Word Search",
+  "description": "Harflar orasidan yashirin so'zlarni toping.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/719102a739cf8968c8ab3cf869280103d76bec12c23c78719be2a6a88835e51e/word-search-logo.png",
+  "url": "https://poki.com/en/g/word-search"
+ },
+ {
+  "name": "Mahjong",
+  "description": "Bir xil toshlarni juftlab olib tashlang — qadimiy Xitoy o'yini.",
+  "category": "🧩 Boshqotirma",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/9c7455b2ad293a789ea402695918ee08/mahjong-logo.png",
+  "url": "https://poki.com/en/g/mahjong"
+ },
+ {
+  "name": "Monkey Mart",
+  "description": "Maymuncha bilan do'kon boshqaring: meva o'stiring, soting va biznesni kengaytiring.",
+  "category": "🏪 Simulyator",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/93142510b4eb8a5b81fc264e31c00b88/monkey-mart-logo.png",
+  "url": "https://poki.com/en/g/monkey-mart"
+ },
+ {
+  "name": "Papa's Pizzeria",
+  "description": "Pitsa tayyorlang va mijozlarni xursand qiling!",
+  "category": "🏪 Simulyator",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/377fd7d97c2b2f4fe25618ccffcc601b/papas-pizzeria-logo.jfif",
+  "url": "https://poki.com/en/g/papas-pizzeria"
+ },
+ {
+  "name": "Master Chess",
+  "description": "Kompyuter yoki do'stingizga qarshi haqiqiy shaxmat.",
+  "category": "♟ Stol o'yinlari",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/505695b9-1b21-47fd-a8e1-93345afb57de/master-chess-logo.png",
+  "url": "https://poki.com/en/g/master-chess"
+ },
+ {
+  "name": "Ludo Hero",
+  "description": "Klassik Ludo: toshlaringizni birinchi bo'lib uyga olib boring.",
+  "category": "♟ Stol o'yinlari",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/aa1108c9f1d4e6d6b564824e6c4a2ca8460e48ae9d3f0b98bdbb8b816ff8c352/ludo-hero-logo.png",
+  "url": "https://poki.com/en/g/ludo-hero"
+ },
+ {
+  "name": "Ludo King",
+  "description": "Mashhur Ludo King — do'stlar bilan zar tashlab o'ynang.",
+  "category": "♟ Stol o'yinlari",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/50f2a0b546ff3966ed27fb28ee7fb226/ludo-king-logo.png",
+  "url": "https://poki.com/en/g/ludo-king"
+ },
+ {
+  "name": "Solitaire",
+  "description": "Klassik pasyans (Solitaire) — kartalarni tartib bilan joylang.",
+  "category": "🃏 Karta o'yinlari",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/b1a4654a-e8b1-4024-bf96-b7bece553a0a/solitaire-logo.jpg",
+  "url": "https://poki.com/en/g/solitaire"
+ },
+ {
+  "name": "Spades",
+  "description": "Spades karta o'yini: jamoa bo'lib hisoblang va g'alaba qozoning.",
+  "category": "🃏 Karta o'yinlari",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/f6364494eb03c0f702ea93fc52d9b09d/spades-logo.jpeg",
+  "url": "https://poki.com/en/g/spades"
+ },
+ {
+  "name": "Pool Club",
+  "description": "Bilyard: sharlarni aniq zarba bilan lunkaga tushiring.",
+  "category": "🎱 Sport",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/fe7b5c8267b63ee56134841474fe0aea/pool-club-logo.png",
+  "url": "https://poki.com/en/g/pool-club"
+ },
+ {
+  "name": "Retro Bowl",
+  "description": "Amerika futboli jamoasini boshqaring va chempionlikka olib boring.",
+  "category": "🏈 Sport",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/ee9ca3764ef4289a48a1ebf457ef605441ed1f35a0f2eb12707a70d609e53686/retro-bowl-logo.png",
+  "url": "https://poki.com/en/g/retro-bowl"
+ },
+ {
+  "name": "Basketball Stars",
+  "description": "1 ga 1 basketbol: to'p tashlang, blok qiling va yuting.",
+  "category": "🏀 Sport",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/bc02c9cdfc5b424ddf343b01edf791ce/basketball-stars-logo.png",
+  "url": "https://poki.com/en/g/basketball-stars"
+ },
+ {
+  "name": "Football Legends",
+  "description": "Futbol afsonalari bilan 1 ga 1 o'yin. Kuchli zarbalar va superqobiliyatlar!",
+  "category": "⚽ Sport",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/c6e0f5e01cd4cbd95ec12dd54c881a89/football-legends-logo.png",
+  "url": "https://poki.com/en/g/football-legends"
+ },
+ {
+  "name": "Penalty Shooters 2",
+  "description": "Penaltilar seriyasi: darvozabonni aldab, gol uring.",
+  "category": "⚽ Sport",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/9f6353ca87481b7f34db483fcf480ae5/penalty-shooters-2-logo.jfif",
+  "url": "https://poki.com/en/g/penalty-shooters-2"
+ },
+ {
+  "name": "Rocket Soccer Derby",
+  "description": "Raketa mashinalari bilan futbol! Ulkan to'pni darvozaga kiriting.",
+  "category": "⚽ Sport",
+  "image": "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=1200,height=1200,fit=cover,f=png/e521bbbf13a6480b60d75421e7edc8d8d0e1edadaccd7d43438864b62a74088a/rocket-soccer-derby-logo.png",
+  "url": "https://poki.com/en/g/rocket-soccer-derby"
+ }
+]

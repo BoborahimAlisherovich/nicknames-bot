@@ -1,3 +1,4 @@
+import data.colors  # noqa: F401
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import json

@@ -40,6 +40,7 @@ async def main() -> None:
     db.create_table_settings()
     db.create_table_channels()
     db.create_table_anon_tokens()
+    db.create_table_anon_messages()
     db.create_table_stickers()
     db.create_table_sticker_packs()
     db.create_table_shared_stickers()

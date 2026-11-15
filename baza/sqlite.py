@@ -267,5 +267,33 @@ class Database:
     def set_setting(self, key: str, value: str):
         self.execute("INSERT OR REPLACE INTO Settings(key, value) VALUES(?, ?)", (key, value), commit=True)
 
+    # ---------------- Anonim xabarlar ----------------
+    def get_anon_token_by_user(self, user_id: int):
+        row = self.execute("SELECT token FROM AnonTokens WHERE user_id=? ORDER BY created_at DESC LIMIT 1", (user_id,), fetchone=True)
+        return row[0] if row else None
+
+    def create_table_anon_messages(self):
+        self.execute("""CREATE TABLE IF NOT EXISTS AnonMessages(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender_id INTEGER NOT NULL,
+            target_id INTEGER NOT NULL,
+            created_at REAL)""", commit=True)
+
+    def add_anon_message(self, sender_id: int, target_id: int) -> int:
+        con = self.connection
+        cur = con.execute("INSERT INTO AnonMessages(sender_id, target_id, created_at) VALUES(?, ?, ?)",
+                          (sender_id, target_id, time.time()))
+        con.commit()
+        rid = cur.lastrowid
+        con.close()
+        return rid
+
+    def get_anon_message(self, msg_id: int):
+        return self.execute("SELECT sender_id, target_id FROM AnonMessages WHERE id=?", (msg_id,), fetchone=True)
+
+    def count_anon_received(self, user_id: int) -> int:
+        row = self.execute("SELECT COUNT(*) FROM AnonMessages WHERE target_id=?", (user_id,), fetchone=True)
+        return row[0] if row else 0
+
 # Create database instance
 db = Database()

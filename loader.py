@@ -1,3 +1,4 @@
+import data.colors  # noqa: F401  — barcha tugmalarni rangli qiladi (eng birinchi bo'lishi shart)
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from data import config

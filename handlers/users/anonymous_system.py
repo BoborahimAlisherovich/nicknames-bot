@@ -1,184 +1,174 @@
+"""Anonim xabarlar tizimi.
+
+- Har bir foydalanuvchining DOIMIY havolasi bor (menyuni har ochganda yangisi yaratilmaydi).
+- Havola botning haqiqiy username'i bilan yasaladi.
+- Yuboruvchi ID'si tugmada emas, bazada saqlanadi (AnonMessages) — anonimlik saqlanadi.
+- Ikki tomonlama javob: qabul qiluvchi ham, yuboruvchi ham "Javob berish" orqali yozishadi.
+- Xabarlar soni bazada hisoblanadi (restartdan keyin ham yo'qolmaydi).
+"""
+import html
+import logging
 import secrets
 import time
-from datetime import datetime
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from urllib.parse import quote
+
+from aiogram import F
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.filters import StateFilter
-from aiogram import F
-from loader import dp, db
-import json
+from aiogram.types import CallbackQuery, CopyTextButton, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-# In-memory storage for non-critical ephemeral data
-anonymous_tokens = {} # For statistics/cache
-rate_limits = {}
+from data.texts import get_texts
+from loader import db, dp
+
+log = logging.getLogger(__name__)
+texts = get_texts()
+
+_open_limits: dict[int, float] = {}
+_send_limits: dict[int, float] = {}
+
+# Menyu tugmalari bosilsa, ular anonim xabar sifatida ketib qolmasin
+MENU_TEXTS = {v for lang in texts.values() for v in lang.get("menu", {}).values()} | {
+    "✨ AI Studio", "🎲 AI O'yinlar", "💝 Donat", "♻️ Orqaga", "♻️ Back", "♻️ Назад"}
+
 
 class AnonimStates(StatesGroup):
     AnonimXabarYuborish = State()
     AnonimJavobQaytarish = State()
 
-def generate_anonymous_token(user_id):
-    """Xavfsiz anonim token yaratadi va bazaga saqlaydi.
 
-    Ilgari token shunchaki hex(user_id) edi — istagan odam
-    hexni desimalga qaytarib, kim ekanligini bilib olardi.
-    Endi kriptografik tasodifiy 32 belgili token beriladi,
-    tokenda user_id umuman yo'q (faqat bizning bazada bog'lanadi).
-    """
-    token = secrets.token_hex(16)
-    db.add_anon_token(token, user_id)
+def is_rate_limited(user_id: int, delay: float = 3) -> bool:
+    """Havolani juda tez-tez ochishdan himoya (start.py ishlatadi)."""
+    now = time.time()
+    if now - _open_limits.get(user_id, 0) < delay:
+        return True
+    _open_limits[user_id] = now
+    return False
+
+
+def _send_limited(user_id: int, delay: float = 3) -> bool:
+    now = time.time()
+    if now - _send_limits.get(user_id, 0) < delay:
+        return True
+    _send_limits[user_id] = now
+    return False
+
+
+def get_or_create_token(user_id: int) -> str:
+    token = db.get_anon_token_by_user(user_id)
+    if not token:
+        token = secrets.token_hex(16)
+        db.add_anon_token(token, user_id)
     return token
 
-def decode_anonymous_token(token):
-    """Token aslida kimniki ekanini bazadan topib beradi."""
+
+def decode_anonymous_token(token: str):
     try:
-        if token.startswith('anon_'):
+        if token.startswith("anon_"):
             token = token[5:]
         return db.get_anon_user(token)
     except Exception:
         return None
 
-def generate_anonymous_link(token):
-    """Generate anonymous message link"""
-    return f"https://t.me/smartrends_bot?start=anon_{token}"
 
-def is_rate_limited(user_id):
-    """Check if user is rate limited for anonymous messages (5s cooldown)"""
-    now = time.time()
-    if user_id in rate_limits:
-        last_time = rate_limits[user_id]
-        if now - last_time < 5:
-            return True
-    rate_limits[user_id] = now
-    return False
+def _not_menu(message: Message) -> bool:
+    return not (message.text and (message.text in MENU_TEXTS or message.text.startswith("/")))
 
-from data.texts import get_texts
 
-texts = get_texts()
+def reply_kb(msg_id: int):
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="💬 Javob berish", callback_data=f"re_an_{msg_id}", style="primary")]])
+
 
 @dp.message(F.text.in_(["🕵️ Anonim xabar", "🕵️ Anonymous Msg", "🕵️ Анонимное сообщение"]), StateFilter("*"))
 async def anonymous_menu_handler(message: Message, state: FSMContext):
     await state.clear()
-    telegram_id = message.from_user.id
-    user = db.select_user_by_id(telegram_id=telegram_id)
+    uid = message.from_user.id
+    user = db.select_user_by_id(telegram_id=uid)
     language = user[2] if user else "uz"
-    
-    user_token = generate_anonymous_token(telegram_id)
-    if user_token not in anonymous_tokens:
-        anonymous_tokens[user_token] = {'user_id': telegram_id, 'message_count': 0}
-    
-    anon_link = generate_anonymous_link(user_token)
-    message_count = anonymous_tokens[user_token]['message_count']
-    
-    anon_texts = {
-        "uz": {
-            "title": "🕵️ Anonim Xabarlar Sistemi",
-            "instructions": f"Qanday ishlaydi:\n\n1. Pastdagi linkni oling va kanal/guruhlarga yuboring.\n2. Ular havola orqali sizga anonim xabar yuborishadi.\n3. Xabarlar shu bot orqali keladi, siz javob bera olasiz.\n\n📊 Jami xabarlar: {message_count}\n\n🔗 Sizning havolangiz:",
-            "copy_link": "📋 Linkni nusxala",
-            "share_link": "🔗 Ulashish"
-        },
-        "us": {
-            "title": "🕵️ Anonymous Message System",
-            "instructions": f"How it works:\n\n1. Get the link below and share it on channels/groups.\n2. They send you anonymous messages via the link.\n3. Messages arrive here, and you can reply.\n\n📊 Total messages: {message_count}\n\n🔗 Your link:",
-            "copy_link": "📋 Copy link",
-            "share_link": "🔗 Share"
-        },
-        "ru": {
-            "title": "🕵️ Анонимные сообщения",
-            "instructions": f"Как это работает:\n\n1. Получите ссылку ниже и отправьте её в каналы/группы.\n2. Они будут отправлять вам анонимные сообщения.\n3. Сообщения приходят сюда, вы можете ответить.\n\n📊 Всего сообщений: {message_count}\n\n🔗 Ваша ссылка:",
-            "copy_link": "📋 Копировать",
-            "share_link": "🔗 Поделиться"
-        }
-    }
 
-    t = anon_texts.get(language, anon_texts["us"])
+    me = await message.bot.me()
+    link = f"https://t.me/{me.username}?start=anon_{get_or_create_token(uid)}"
+    count = db.count_anon_received(uid)
 
-    response_text = f"{t['title']}\n\n{t['instructions']}\n\n`{anon_link}`\n\n"
-    
-    keyboard = InlineKeyboardBuilder()
-    keyboard.row(
-        InlineKeyboardButton(text=t['copy_link'], callback_data=f"cp_an_{user_token}"),
-        InlineKeyboardButton(text=t['share_link'], switch_inline_query=f"\n🕵️ Menga anonim xabar yuborishingiz mumkin! \n👉 {anon_link}")
+    text = (
+        "🕵️ <b>Anonim xabarlar</b>\n\n"
+        "1️⃣ Havolani nusxalab, story, kanal yoki guruhga qo'ying.\n"
+        "2️⃣ Odamlar havola orqali sizga anonim xabar yozadi.\n"
+        "3️⃣ Xabarlar shu yerga keladi — siz ham anonim javob bera olasiz.\n\n"
+        f"📊 Sizga kelgan xabarlar: <b>{count}</b>\n\n"
+        f"🔗 Havolangiz:\n<code>{html.escape(link)}</code>"
     )
-    
+    share = f"https://t.me/share/url?url={quote(link)}&text={quote('🕵️ Menga anonim xabar yozing!')}"
     back_text = texts.get(language, {}).get("back_button", "♻️ Orqaga")
-    keyboard.row(InlineKeyboardButton(text=back_text, callback_data="back_to_menu"))
-    
-    await message.answer(response_text, reply_markup=keyboard.as_markup(), parse_mode="Markdown")
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📋 Nusxalash", copy_text=CopyTextButton(text=link), style="success"),
+         InlineKeyboardButton(text="🔗 Ulashish", url=share, style="primary")],
+        [InlineKeyboardButton(text=back_text, callback_data="back_to_menu", style="danger")],
+    ])
+    await message.answer(text, reply_markup=kb, disable_web_page_preview=True)
 
-@dp.message(AnonimStates.AnonimXabarYuborish)
+
+@dp.message(AnonimStates.AnonimXabarYuborish, _not_menu)
 async def handle_anon_message_delivery(message: Message, state: FSMContext):
-    user_data = await state.get_data()
-    token = user_data.get("anon_token")
-    if not token:
-        await state.clear()
-        return
-
-    target_id = decode_anonymous_token(token)
+    token = (await state.get_data()).get("anon_token")
+    target_id = decode_anonymous_token(token) if token else None
     if not target_id:
-        await message.answer("❌ Bu anonim havola yaroqsiz.")
         await state.clear()
-        return
+        return await message.answer("❌ Bu anonim havola yaroqsiz.")
 
-    # Zip check
-    if message.document and message.document.file_name and message.document.file_name.lower().endswith(".zip"):
-        await message.answer("❌ .zip fayllar taqiqlangan.")
-        return
+    if message.document and (message.document.file_name or "").lower().endswith((".zip", ".apk", ".exe")):
+        return await message.answer("❌ Bunday fayllarni yuborib bo'lmaydi.")
+    if _send_limited(message.from_user.id):
+        return await message.answer("⏱ Biroz kuting, juda tez yozyapsiz.")
 
+    msg_id = db.add_anon_message(message.from_user.id, target_id)
     try:
-        reply_markup = InlineKeyboardBuilder()
-        reply_markup.add(InlineKeyboardButton(text="Javob berish 💬", callback_data=f"re_an_{message.from_user.id}"))
-        
-        await message.bot.send_message(chat_id=target_id, text="📨 **Yangi anonim xabar tushdi:**", parse_mode="Markdown")
-        await message.copy_to(chat_id=target_id, reply_markup=reply_markup.as_markup())
-        
-        if token not in anonymous_tokens:
-            anonymous_tokens[token] = {'user_id': target_id, 'message_count': 0}
-        anonymous_tokens[token]['message_count'] += 1
-        
-        await message.answer("✅ Xabar yuborildi!")
+        await message.bot.send_message(target_id, "📨 <b>Sizga yangi anonim xabar keldi:</b>")
+        await message.copy_to(chat_id=target_id, reply_markup=reply_kb(msg_id))
+        await message.answer("✅ Xabar anonim yuborildi!\n\n✍️ Yana yozishingiz mumkin yoki menyudan chiqing.")
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"Anonim xabar yuborilmadi ({target_id}): {e}")
-        await message.answer("❌ Xabar yuborilmadi.")
-    
-    await state.clear()
+        log.warning("Anonim xabar yuborilmadi (%s): %s", target_id, e)
+        await state.clear()
+        await message.answer("❌ Xabar yetkazilmadi — qabul qiluvchi botni bloklagan bo'lishi mumkin.")
 
-@dp.callback_query(lambda c: c.data.startswith("re_an_"))
+
+@dp.callback_query(F.data.startswith("re_an_"))
 async def start_anon_reply(callback: CallbackQuery, state: FSMContext):
-    target_id = callback.data.split("_")[2]
-    await state.update_data(reply_target_id=target_id)
+    try:
+        row = db.get_anon_message(int(callback.data[6:]))
+    except ValueError:
+        row = None
+    if not row or callback.from_user.id not in row:
+        return await callback.answer("❌ Bu xabarga javob berib bo'lmaydi", show_alert=True)
+    sender_id, target_id = row
+    other = sender_id if callback.from_user.id == target_id else target_id
     await state.set_state(AnonimStates.AnonimJavobQaytarish)
-    await callback.message.answer("🕵️ **Javobingizni kiriting:**")
+    await state.update_data(reply_target_id=other)
+    await callback.message.answer("🕵️ <b>Javobingizni yozing</b> (matn, rasm, ovoz — hammasi bo'ladi):")
     await callback.answer()
 
-@dp.message(AnonimStates.AnonimJavobQaytarish)
+
+@dp.message(AnonimStates.AnonimJavobQaytarish, _not_menu)
 async def deliver_anon_reply(message: Message, state: FSMContext):
-    data = await state.get_data()
-    target_id = data.get("reply_target_id")
-    if not target_id:
-        await state.clear()
-        return
-
-    try:
-        reply_markup = InlineKeyboardBuilder()
-        reply_markup.add(InlineKeyboardButton(text="Javob berish 💬", callback_data=f"re_an_{message.from_user.id}"))
-        await message.bot.send_message(chat_id=int(target_id), text="🗣 **Anonim javob keldi:**", parse_mode="Markdown")
-        await message.copy_to(chat_id=int(target_id), reply_markup=reply_markup.as_markup())
-        await message.answer("✅ Yuborildi!")
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"Anonim javob yuborilmadi ({target_id}): {e}")
-        await message.answer("❌ Xato.")
+    target_id = (await state.get_data()).get("reply_target_id")
     await state.clear()
+    if not target_id:
+        return
+    msg_id = db.add_anon_message(message.from_user.id, int(target_id))
+    try:
+        await message.bot.send_message(int(target_id), "🗣 <b>Anonim javob keldi:</b>")
+        await message.copy_to(chat_id=int(target_id), reply_markup=reply_kb(msg_id))
+        await message.answer("✅ Javob yuborildi!")
+    except Exception as e:
+        log.warning("Anonim javob yuborilmadi (%s): %s", target_id, e)
+        await message.answer("❌ Javob yetkazilmadi.")
 
-@dp.callback_query(lambda c: c.data.startswith("cp_an_"))
-async def copy_anon_link(callback: CallbackQuery):
-    token = callback.data.split("_")[2]
-    link = generate_anonymous_link(token)
-    # Give a message that is easy to copy
-    await callback.message.answer(f"📋 **Sizning havolangiz (Nusxa olish uchun bosing):**\n\n`{link}`", parse_mode="Markdown")
-    await callback.answer("Link yuborildi!")
 
-
+@dp.callback_query(F.data.startswith("cp_an_"))
+async def copy_anon_link_old(callback: CallbackQuery):
+    """Eski xabarlardagi 'Nusxalash' tugmasi uchun."""
+    me = await callback.bot.me()
+    link = f"https://t.me/{me.username}?start=anon_{callback.data[6:]}"
+    await callback.message.answer(f"📋 Havolangiz:\n\n<code>{html.escape(link)}</code>")
+    await callback.answer()

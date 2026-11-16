@@ -27,8 +27,9 @@ def create_menu_buttons(language):
             [KeyboardButton(text=button_texts["menu_button_2"]), KeyboardButton(text=button_texts["menu_button_8"])],
             [KeyboardButton(text=button_texts["menu_button_9"]), KeyboardButton(text=button_texts["menu_button_10"])],
             [KeyboardButton(text=button_texts["menu_button_4"]), KeyboardButton(text=button_texts["menu_button_5"])],
-            [KeyboardButton(text="✨ AI Studio", style="primary"), KeyboardButton(text="🎲 AI O'yinlar", style="success")],
-            [KeyboardButton(text="💝 Donat", style="danger"), KeyboardButton(text=button_texts["menu_button_3"])]
+            [KeyboardButton(text="🤖 AI yordamchi", style="success"), KeyboardButton(text="✨ AI Studio", style="primary")],
+            [KeyboardButton(text="🎲 AI O'yinlar", style="success"), KeyboardButton(text="💝 Donat", style="danger")],
+            [KeyboardButton(text=button_texts["menu_button_3"])]
         ],
         resize_keyboard=True,
     )

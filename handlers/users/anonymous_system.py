@@ -29,7 +29,7 @@ _send_limits: dict[int, float] = {}
 
 # Menyu tugmalari bosilsa, ular anonim xabar sifatida ketib qolmasin
 MENU_TEXTS = {v for lang in texts.values() for v in lang.get("menu", {}).values()} | {
-    "✨ AI Studio", "🎲 AI O'yinlar", "💝 Donat", "♻️ Orqaga", "♻️ Back", "♻️ Назад"}
+    "✨ AI Studio", "🎲 AI O'yinlar", "💝 Donat", "🤖 AI yordamchi", "♻️ Orqaga", "♻️ Back", "♻️ Назад"}
 
 
 class AnonimStates(StatesGroup):

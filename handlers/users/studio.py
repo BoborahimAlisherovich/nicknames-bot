@@ -81,31 +81,17 @@ SECTIONS = {
 
 
 async def ai(prompt: str) -> str | None:
-    key = settings.gemini_key()
-    if not key:
-        return None
-    body = {"contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 1.0, "maxOutputTokens": 1024}}
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=_SSL)) as s:
-        for model in GEMINI_MODELS:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-            try:
-                async with s.post(url, params={"key": key}, json=body,
-                                  timeout=aiohttp.ClientTimeout(total=30)) as r:
-                    data = await r.json(content_type=None)
-                    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-            except Exception as e:
-                log.warning("Gemini %s xato: %s", model, e)
-    return None
+    from data.gemini import ask
+    return await ask(prompt)
 
 
-SYSTEM = ("Sen o'zbek tilidagi kreativ yordamchisan. Javobni foydalanuvchi tilida, "
-          "markdown belgilarisiz (* # yo'q), toza ro'yxat ko'rinishida ber.\nVazifa: ")
+SYSTEM = "Vazifa: "
 
 
 # ------------------------------------------------------------------ AI Studio
 def home_kb():
     return kb(
+        [b("🤖 AI yordamchi (har qanday mavzu)", "chat:open", "success")],
         *[[b(t, f"st:{k}", s)] for k, (t, _, s) in SECTIONS.items()],
         [b("🎲 AI O'yinlar", "g:home", "primary"), b("💝 Donat", "d:home", "success")],
     )
@@ -139,20 +125,30 @@ async def tool(c: CallbackQuery, state: FSMContext):
     await c.message.edit_text(f"<b>{TOOLS[key][0]}</b>\n\n✍️ {TOOLS[key][1]}", reply_markup=kb([BACK]))
 
 
-async def run_tool(m: Message, key: str, query: str):
-    wait = await m.answer("⏳ AI o'ylayapti...")
+async def run_tool(m: Message, uid: int, key: str, query: str):
+    from data import paywall
+    left = paywall.left(uid, "ai_studio")
+    if left == 0:
+        return await m.answer(paywall.offer_text("ai_pro", "🆓 3 ta bepul so'rovingiz tugadi.\n"),
+                              reply_markup=paywall.offer_kb("ai_pro", "st:home"))
+    wait = await m.answer("⏳ AI yozmoqda...")
+    await m.bot.send_chat_action(m.chat.id, "typing")
     res = await ai(f"{SYSTEM}{TOOLS[key][2]}\nFoydalanuvchi so'rovi: {query}")
     if res is None:
-        res = "⚠️ AI hozir mavjud emas (GEMINI_API_KEY sozlanmagan yoki limit tugagan)."
-    await wait.edit_text(f"<b>{TOOLS[key][0]}</b>\n\n{html.escape(res)[:4000]}",
+        return await wait.edit_text("⚠️ AI hozir javob bermadi, birozdan so'ng qayta urinib ko'ring.",
+                                    reply_markup=kb([b("🔄 Qayta urinish", "re", "success"), BACK]))
+    paywall.consume(uid, "ai_studio")
+    left = paywall.left(uid, "ai_studio")
+    note = "" if left is None else f"\n\n🆓 Bepul so'rovlar qoldi: {left}/3"
+    await wait.edit_text(f"<b>{TOOLS[key][0]}</b>\n\n{html.escape(res)[:3900]}{note}",
                          reply_markup=kb([b("🔄 Yana", "re", "success"), BACK]))
 
 
 @dp.message(St.ai_input, F.text)
 async def ai_input(m: Message, state: FSMContext):
     data = await state.get_data()
-    await state.update_data(q=m.text[:500])
-    await run_tool(m, data["tool"], m.text[:500])
+    await state.update_data(q=m.text[:800])
+    await run_tool(m, m.from_user.id, data["tool"], m.text[:800])
 
 
 @dp.callback_query(F.data == "re")
@@ -161,17 +157,103 @@ async def regen(c: CallbackQuery, state: FSMContext):
     if not d.get("q"):
         return await c.answer("Qaytadan tanlang", show_alert=True)
     await c.answer()
-    await run_tool(c.message, d["tool"], d["q"])
+    await run_tool(c.message, c.from_user.id, d["tool"], d["q"])
+
+
+# ------------------------------------------------------------------ AI yordamchi (erkin suhbat)
+CHAT_BTNS = ["🤖 AI yordamchi"]
+CHAT_SYSTEM = ("Sen aqlli, do'stona va bilimdon AI yordamchisan. Har qanday mavzuda (o'qish, dasturlash, "
+               "biznes, sog'liq bo'yicha umumiy maslahat, tarjima, matn yozish, hayotiy savollar) aniq va foydali "
+               "javob ber. Foydalanuvchi tilida yoz. Markdown belgilarini ishlatma (* # ` yo'q), ro'yxat va emojilardan "
+               "foydalan. Javob qisqa va mazmunli bo'lsin, kerak bo'lsa batafsil tushuntir.")
+
+
+class Chat(StatesGroup):
+    talk = State()
+
+
+def chat_kb():
+    return kb([b("🧹 Yangi suhbat", "chat:new", "primary"), b("⬅️ Chiqish", "chat:exit", "danger")])
+
+
+async def chat_open(m: Message, state: FSMContext, uid: int):
+    from data import paywall
+    await state.clear()
+    await state.set_state(Chat.talk)
+    await state.update_data(hist=[])
+    left = paywall.left(uid, "ai_chat")
+    limit = "♾ Cheksiz (AI Pro)" if left is None else f"🆓 Bepul xabarlar: {left}/10"
+    await m.answer("🤖 <b>AI yordamchi</b>\n\nIstalgan mavzuda savol bering — men javob beraman!\n"
+                   f"Masalan: «Ingliz tilini qanday tez o'rganaman?»\n\n{limit}", reply_markup=chat_kb())
+
+
+@dp.message(Command("ai"), StateFilter("*"))
+@dp.message(F.text.in_(CHAT_BTNS), StateFilter("*"))
+async def chat_start(m: Message, state: FSMContext):
+    await chat_open(m, state, m.from_user.id)
+
+
+@dp.callback_query(F.data == "chat:open")
+async def chat_start_cb(c: CallbackQuery, state: FSMContext):
+    await c.answer()
+    await chat_open(c.message, state, c.from_user.id)
+
+
+@dp.callback_query(F.data == "chat:new")
+async def chat_new(c: CallbackQuery, state: FSMContext):
+    await state.set_state(Chat.talk)
+    await state.update_data(hist=[])
+    await c.answer("🧹 Suhbat tozalandi")
+    await c.message.answer("🆕 Yangi suhbat boshlandi. Savolingizni yozing:")
+
+
+@dp.callback_query(F.data == "chat:exit")
+async def chat_exit(c: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await c.answer()
+    await c.message.answer("👋 AI yordamchidan chiqdingiz.")
+
+
+def _not_menu(m: Message) -> bool:
+    from handlers.users.anonymous_system import MENU_TEXTS
+    return m.text not in MENU_TEXTS and not m.text.startswith("/")
+
+
+@dp.message(Chat.talk, F.text, _not_menu)
+async def chat_msg(m: Message, state: FSMContext):
+    from data import paywall
+    from data.gemini import ask
+    uid = m.from_user.id
+    if paywall.left(uid, "ai_chat") == 0:
+        return await m.answer(paywall.offer_text("ai_pro", "🆓 10 ta bepul xabaringiz tugadi.\n"),
+                              reply_markup=paywall.offer_kb("ai_pro", "chat:exit"))
+    hist = (await state.get_data()).get("hist", [])[-10:]
+    await m.bot.send_chat_action(m.chat.id, "typing")
+    res = await ask(m.text[:2000], history=hist, system=CHAT_SYSTEM, max_tokens=1800, temperature=0.7)
+    if not res:
+        return await m.answer("⚠️ AI hozir javob bermadi, qayta yozib ko'ring.")
+    paywall.consume(uid, "ai_chat")
+    hist += [{"role": "user", "text": m.text[:2000]}, {"role": "model", "text": res[:3000]}]
+    await state.update_data(hist=hist[-10:])
+    left = paywall.left(uid, "ai_chat")
+    note = "" if left is None else f"\n\n🆓 Qoldi: {left}/10"
+    text = html.escape(res)
+    for i in range(0, len(text), 3900):
+        last = i + 3900 >= len(text)
+        await m.answer(text[i:i + 3900] + (note if last else ""), reply_markup=chat_kb() if last else None)
 
 
 # ------------------------------------------------------------------ O'yinlar
 def games_kb():
     return kb(
+        [b("⚡ Tezkor matematika", "ag:math", "success"), b("🇬🇧 Ingliz tili", "ag:en", "success")],
+        [b("🤖 AI sizning soningizni topadi", "ag:bot", "primary")],
         [b("🧩 AI topishmoq", "g:riddle", "primary"), b("🔢 Son top", "g:guess", "success")],
         [b("❓ AI viktorina", "g:quiz", "success"), b("🔤 So'z top", "g:word", "primary")],
         [b("🎬 Emoji topishmoq", "g:emoji", "primary"), b("✂️ Tosh-qaychi-qog'oz", "g:rps", "success")],
         [b("🎲", "g:d:🎲"), b("🎯", "g:d:🎯"), b("🏀", "g:d:🏀"),
          b("⚽", "g:d:⚽"), b("🎳", "g:d:🎳"), b("🎰", "g:d:🎰")],
+        [b("🏆 Reyting", "ag:top", "success")],
         [BACK],
     )
 
@@ -472,3 +554,10 @@ async def unlock_buy(c: CallbackQuery):
         return await c.answer("✅ Bu sizda allaqachon ochiq", show_alert=True)
     await c.answer()
     await paywall.send_invoice(c.from_user.id, item)
+
+
+@dp.shutdown()
+async def _close_ai_session():
+    from data import gemini
+    if gemini._session and not gemini._session.closed:
+        await gemini._session.close()

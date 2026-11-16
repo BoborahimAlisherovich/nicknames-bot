@@ -396,41 +396,49 @@ async def add_sticker_via_button(callback: CallbackQuery, state: FSMContext):
 # ---------------- Telegram statik paketlari ----------------
 
 @dp.callback_query(F.data == "stpack_static")
+@dp.callback_query(F.data.startswith("sttr_"))
 async def static_packs(callback: CallbackQuery):
-    language = _lang(callback.from_user.id)
-
+    from data import paywall
+    page = int(callback.data[5:]) if callback.data.startswith("sttr_") else 0
+    if page >= FREE_PAGES and not paywall.has(callback.from_user.id, "stickers_all"):
+        await callback.answer()
+        return await callback.message.edit_text(
+            paywall.offer_text("stickers_all", f"🆓 Birinchi {FREE_PAGES} sahifa bepul.\n"),
+            reply_markup=paywall.offer_kb("stickers_all", f"sttr_{FREE_PAGES - 1}"))
     await callback.answer("⏳")
-    packs = await verified_packs() or [dict(p, count=0) for p in STATIC_PACKS[:10]]
+    packs = await verified_packs() or [dict(p, count=0) for p in STATIC_PACKS]
+    pages = max(1, (len(packs) + TR_PER_PAGE - 1) // TR_PER_PAGE)
+    page = min(page, pages - 1)
     markup = InlineKeyboardBuilder()
-    for p in packs[:60]:
-        markup.button(text=f"{p['title']} ({p['count']})" if p["count"] else p["title"],
-                      url=f"https://t.me/addstickers/{p['name']}")
-    markup.adjust(2)
+    for p in packs[page * TR_PER_PAGE:(page + 1) * TR_PER_PAGE]:
+        markup.row(InlineKeyboardButton(text=f"{p['title']} ({p['count']} ta)" if p["count"] else p["title"],
+                                        url=f"https://t.me/addstickers/{p['name']}"))
+    nav = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="⬅️", callback_data=f"sttr_{page - 1}"))
+    if page + 1 < pages:
+        locked = page + 1 >= FREE_PAGES and not paywall.has(callback.from_user.id, "stickers_all")
+        nav.append(InlineKeyboardButton(text="➡️ 🔒 10 ⭐" if locked else "➡️", callback_data=f"sttr_{page + 1}"))
+    if nav:
+        markup.row(*nav)
     markup.row(icon_button("♻️ Orqaga", callback_data="st_menu", style_key="back"))
-
+    text = ("🌍 <b>Telegram trend paketlari</b>\n\n"
+            "Paketni bosing va <b>ADD STICKERS</b> tugmasini bosing — butun paket bir bosishda o'rnatiladi!\n\n"
+            f"📄 {page + 1}/{pages}")
     try:
-        await callback.message.edit_text(
-            "🌍 <b>Telegram trend paketlari</b>\n\n"
-            "Bosib oching va <b>ADD STICKERS</b> tugmasini bosing - "
-            "butun paket bir bosishda o'rnatiladi!",
-            parse_mode="HTML",
-            reply_markup=markup.as_markup()
-        )
+        await callback.message.edit_text(text, parse_mode="HTML", reply_markup=markup.as_markup())
     except Exception:
-        await callback.message.answer(
-            "🌍 <b>Telegram trend paketlari</b>",
-            parse_mode="HTML",
-            reply_markup=markup.as_markup()
-        )
+        await callback.message.answer(text, parse_mode="HTML", reply_markup=markup.as_markup())
 
 
 # ---------------- ⭐ Umumiy stikerlar kolleksiyasi (faqat admin qo'shadi) ----------------
 
-SH_PER_PAGE = 8
-FREE_PAGES = 3  # shundan keyingi sahifalar 10 ⭐ bilan ochiladi
+SH_PER_PAGE = 5
+TR_PER_PAGE = 5
+from data.paywall import FREE_PAGES  # 4 => 3 marta ➡️ bepul, keyingisi 10 ⭐
 
 
-def _shared_markup(page: int, is_admin: bool, language: str):
+def _shared_markup(page: int, is_admin: bool, language: str, user_id: int = 0):
     rows = db.get_shared_stickers()
     start = page * SH_PER_PAGE
     chunk = rows[start:start + SH_PER_PAGE]
@@ -447,8 +455,8 @@ def _shared_markup(page: int, is_admin: bool, language: str):
             nav.append(InlineKeyboardButton(text="⬅️", callback_data=f"stshpg_{page-1}"))
         if start + SH_PER_PAGE < len(rows):
             from data import paywall
-            locked = page + 1 >= FREE_PAGES and not is_admin
-            nav.append(InlineKeyboardButton(text="➡️ 🔒 10 ⭐" if locked and page + 1 == FREE_PAGES else "➡️",
+            locked = page + 1 >= FREE_PAGES and not paywall.has(user_id, "stickers_all")
+            nav.append(InlineKeyboardButton(text="➡️ 🔒 10 ⭐" if locked else "➡️",
                                             callback_data=f"stshpg_{page+1}"))
         if nav:
             markup.row(*nav)
@@ -481,10 +489,10 @@ def _shared_markup(page: int, is_admin: bool, language: str):
 async def _show_shared(callback: CallbackQuery, page: int = 0):
     language = _lang(callback.from_user.id)
     is_admin = callback.from_user.id in ADMINS
-    markup, total = _shared_markup(page, is_admin, language)
+    markup, total = _shared_markup(page, is_admin, language, callback.from_user.id)
 
     text = (
-        f"⭐ <b>Stikerlar kolleksiyasi</b> ({total} ta)\n\n"
+        f"⭐ <b>Stikerlar kolleksiyasi</b> ({total} ta) · 📄 {page + 1}/{max(1, (total + SH_PER_PAGE - 1) // SH_PER_PAGE)}\n\n"
         "Stikerni bosing - darhol yuboriladi.\n"
         "💡 Yuborilgan stikerni ustiga bosib <b>Add to Favorites</b> qilsangiz, "
         "doim qo'lingizda bo'ladi!\n"

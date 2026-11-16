@@ -17,3 +17,4 @@ from . import nick_ai
 from . import stikers
 
 from . import studio
+from . import ai_games

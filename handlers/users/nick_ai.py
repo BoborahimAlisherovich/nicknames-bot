@@ -160,26 +160,14 @@ async def generate_ai_nicks(name: str, theme_key: str, language: str = "uz", cou
         f"no numbers, no explanations. Descriptions must feel natural in {lang_name} culture."
     )
 
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    try:
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=_SSL)) as session:
-            async with session.post(
-                f"{GEMINI_URL}?key={key}",
-                json=payload,
-                timeout=aiohttp.ClientTimeout(total=25),
-            ) as resp:
-                if resp.status != 200:
-                    logger.warning(f"Gemini API {resp.status}: {(await resp.text())[:200]}")
-                    return None
-                data = await resp.json()
-
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        nicks = [line.strip().lstrip("0123456789.-) ") for line in text.splitlines()]
-        nicks = [n for n in nicks if n][:count]
-        return nicks if nicks else None
-    except Exception as e:
-        logger.warning(f"Gemini API xato: {e}")
+    from data.gemini import ask
+    text = await ask(prompt, system="You are a creative nickname designer. Output only nicknames, one per line.",
+                     max_tokens=600, temperature=1.0)
+    if not text:
         return None
+    nicks = [line.strip().lstrip("0123456789.-) ") for line in text.splitlines()]
+    nicks = [n for n in nicks if n][:count]
+    return nicks or None
 
 
 async def generate_nicks(name: str, theme_key: str, language: str = "uz", count: int = 10) -> tuple[list[str], str]:
